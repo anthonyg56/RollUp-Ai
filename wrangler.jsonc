@@ -1,0 +1,12 @@
+{
+  "r2_buckets": [
+    {
+      "bucket_name": "video-uploads",
+      "binding": "video_uploads"
+    },
+    {
+      "bucket_name": "generated-videos",
+      "binding": "generated_videos"
+    }
+  ]
+}

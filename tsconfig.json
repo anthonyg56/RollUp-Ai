@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "hono/jsx",
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@server/*": ["./server/*"],
+      
+      // Server Utilities
+      "@server-utils": ["./server/lib/utils"]
+    }
+  },
+  "include": ["server/**/*.ts", "server/**/*.tsx", "client/**/*.ts", "client/**/*.tsx"],
+  "exclude": ["node_modules", "dist"]
+}
