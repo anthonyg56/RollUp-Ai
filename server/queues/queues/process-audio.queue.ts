@@ -10,6 +10,8 @@ export interface IProcessAudioResult extends IProcessVideoResults {
   srtTranscript: string | null;
   plainTranscript: string | null;
   captionedVideoAssetId: string | null;
+  captionedVideoAssetR2Key: string | null;
+  captionedVideoAssetR2ETag: string | null;
   captionedVideoPath: string | null;
 }
 

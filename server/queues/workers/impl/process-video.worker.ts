@@ -2,20 +2,31 @@ import { PROCESS_VIDEO_QUEUE } from "@server/queues/config/queue-names";
 import { Worker, Job } from "bullmq";
 import { IProcessVideoData, IProcessVideoResults } from "@server/queues/queues/process-video.queue";
 import { extractVideoMetadata, generateThumbnail, optimizeVideo } from "@server/services/ffmpeg";
-import { getVideoAssetById } from "@server/services/db/assets.services";
+import { getVideoAssetById, uploadAsset } from "@server/services/db/assets.services";
 import redisConnection from "@server/queues/config/redis-connection";
 import { uploadThumnail } from "@server/services/db/video_thumbnail.services";
 
 const worker = new Worker<IProcessVideoData, IProcessVideoResults>(
   PROCESS_VIDEO_QUEUE,
   async function ({ data }) {
-    const { submissionInfo } = data;
+    const { submissionInfo, userId } = data;
 
     const originalVideoAsset = await getVideoAssetById(submissionInfo.videoSubmissionId);
 
     const optimizedVideoPath = await optimizeVideo(originalVideoAsset.r2Key);
 
-    const optimizedVideoMetadata = await extractVideoMetadata(optimizedVideoPath, originalVideoAsset.id);
+    const {
+      id: optimizedVideoAssetId,
+      r2Key: optimizedVideoAssetR2Key,
+    } = await uploadAsset({
+      userId,
+      path: optimizedVideoPath,
+      videoSubmissionId: originalVideoAsset.videoSubmissionId,
+      bucketName: "optimized_videos",
+      unlinkPath: false,
+    });
+
+    const optimizedVideoMetadata = await extractVideoMetadata(optimizedVideoAssetR2Key, optimizedVideoAssetId);
 
     const thumbnailPath = await generateThumbnail(optimizedVideoPath, optimizedVideoMetadata.resolution ?? undefined);
 
@@ -23,6 +34,7 @@ const worker = new Worker<IProcessVideoData, IProcessVideoResults>(
 
     return {
       originalVideoAsset,
+      optimizedVideoAssetId,
       optimizedVideoPath,
     };
   }, {

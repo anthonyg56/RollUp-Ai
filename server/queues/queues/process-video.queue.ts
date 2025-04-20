@@ -12,6 +12,7 @@ export interface IProcessVideoData extends IVideoFlowInput { };
 export interface IProcessVideoResults {
   originalVideoAsset: VideoAsset;
   optimizedVideoPath: string;
+  optimizedVideoAssetId: string;
 }
 
 const processVideoQueue = new Queue<IProcessVideoData, IProcessVideoResults>(PROCESS_VIDEO_QUEUE, {

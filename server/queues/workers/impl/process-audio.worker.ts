@@ -34,15 +34,27 @@ const processAudioWorker = new Worker<IProcessAudioData, IProcessAudioResult>(PR
   });
 
   const captionedVideoPath = await burnCaptions(optimizedVideoPath, srtTranscript, originalVideoAsset.id);
-  const captionedVideoAssetId = await uploadAsset(captionedVideoPath, userId, originalVideoAsset.videoSubmissionId, false);
+  const {
+    id: captionedVideoAssetId,
+    r2Key: captionedVideoAssetR2Key,
+    r2ETag: captionedVideoAssetR2ETag,
+  } = await uploadAsset({
+    path: captionedVideoPath,
+    userId,
+    videoSubmissionId: originalVideoAsset.videoSubmissionId,
+    bucketName: "captioned_videos",
+    unlinkPath: false,
+  });
 
   return {
     ...job.returnvalue,
     audioPath,
     captionedVideoAssetId,
+    captionedVideoAssetR2Key,
+    captionedVideoAssetR2ETag,
     captionedVideoPath,
-    srtTranscript: srtTranscript as string,
-    plainTranscript: plainTranscript as string,
+    srtTranscript,
+    plainTranscript,
   };
 }, {
   connection: redisConnection,
