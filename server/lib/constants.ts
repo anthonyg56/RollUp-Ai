@@ -1,5 +1,6 @@
 // Environment variables
 export const APP_PORT = process.env.PORT || 3000;
+export const APP_HOSTNAME = process.env.HOSTNAME || 'localhost';
 export const IS_PROD = process.env.NODE_ENV === "production";
 export const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 
