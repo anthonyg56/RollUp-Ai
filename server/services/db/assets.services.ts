@@ -1,6 +1,6 @@
 import db from "@server/db";
 import { videoAssets } from "@server/db/models/video_assets";
-import { VideoAssetType } from "@server/lib/constants";
+import { R2Bucket, VideoAssetType } from "@server/lib/constants";
 import { eq } from "drizzle-orm";
 import { putVideoAsset } from "../r2";
 import { unlink } from "node:fs/promises";
@@ -46,34 +46,43 @@ export async function getVideoAssetById(id: string) {
   }
 }
 
-
-interface IUploadVideoAssetData {
+interface UploadAssetOptions {
+  path: string;
   userId: string;
-  assetType: VideoAssetType;
-  r2ETag: string;
-  r2Key: string;
   videoSubmissionId: string;
+  bucketName: R2Bucket;
+  unlinkPath?: boolean;
 }
 
 /**
  * Uploads a video asset to R2 and The Database
  */
-export async function uploadAsset(path: string, userId: string, videoSubmissionId: string, unlinkPath = true) {
+export async function uploadAsset({
+  path,
+  userId,
+  videoSubmissionId,
+  bucketName,
+  unlinkPath = true,
+}: UploadAssetOptions) {
   const file = Bun.file(path);
 
-  const { eTag, key } = await putVideoAsset(file, "optimized_videos");
+  const { eTag, key } = await putVideoAsset(file, bucketName);
 
-  const { id: optimizedVideoAssetId } = await insertNewVideoAsset({
-    userId: userId,
+  const { id: assetId } = await insertNewVideoAsset({
+    userId,
     assetType: "captioned_video",
     r2ETag: eTag as string,
     r2Key: key,
-    videoSubmissionId: videoSubmissionId,
+    videoSubmissionId,
   });
 
   if (unlinkPath) {
     await unlink(path).catch(() => { });
   }
 
-  return optimizedVideoAssetId;
+  return {
+    id: assetId,
+    r2Key: key,
+    r2ETag: eTag,
+  };
 }
