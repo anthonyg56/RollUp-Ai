@@ -6,6 +6,12 @@ import { HonoVariables } from '@server/types';
 import { serverLogger } from '@server/lib/configs/logger';
 import api from './api';
 import { loggingMiddleware } from './middleware/logging';
+import { resolve } from 'node:path';
+
+const viteDistPath = resolve(__dirname, 'client/dist')
+
+serverLogger.info("Server Directory: ", __dirname);
+serverLogger.info("Vite Dist Path: ", viteDistPath);
 
 const app = new Hono<{ Variables: HonoVariables }>()
   .onError((err, c) => {
@@ -28,7 +34,9 @@ const app = new Hono<{ Variables: HonoVariables }>()
   })
   .use("*", loggingMiddleware)
   .route("/api", api)
-  .get("*", serveStatic({ root: "./client/dist" }))
-  .get("*", serveStatic({ root: "./client/dist/index.html" }));
+  .use('/assets/*', serveStatic({ root: "./client/dist" }))
+  .use('/favicon.ico', serveStatic({ path: './favicon.ico', root: "./client/dist" }))
+  .use('/manifest.json', serveStatic({ path: './manifest.json', root: "./client/dist" }))
+  .get('*', serveStatic({ path: './index.html', root: "./client/dist" }))
 
 export default app
