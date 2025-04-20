@@ -8,6 +8,7 @@ import { useDialogStore } from "@/hooks/useStores";
 import authClient from "@server/auth/authClient";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "./ui/skeleton"
+import { Badge } from "./ui/badge";
 
 export default function ProtectedNavbar() {
   const matchRoute = useMatchRoute()
@@ -49,6 +50,10 @@ export default function ProtectedNavbar() {
             </div>
             <span className="hidden font-bold sm:inline-block">RollUp AI</span>
           </Link>
+          <Badge variant="secondary" className="text-xs">
+            Pro Tier
+          </Badge>
+
         </div>
 
         {/* Profile and subscription or Auth buttons */}

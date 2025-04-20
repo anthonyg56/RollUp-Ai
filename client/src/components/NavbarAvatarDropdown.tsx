@@ -9,7 +9,6 @@ import { capitalizeFirstLetter } from "@/lib/utils";
 import { useDialogStore } from "@/hooks/useStores";
 import authClient from "@server/auth/authClient";
 import { useNavigate } from "@tanstack/react-router";
-import { Badge } from "./ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 const { signOut } = authClient;
@@ -35,9 +34,7 @@ export default function NavbarAvatarDropdown({ name, email, avatarUrl }: NavbarA
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex flex-col items-end">
             <span className="text-sm font-medium">{capitalizedName}</span>
-            <Badge variant="secondary" className="text-xs">
-              Pro Tier
-            </Badge>
+
           </div>
           <Avatar>
             <AvatarImage src={avatarUrl} alt="User avatar" />
