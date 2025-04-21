@@ -1,9 +1,21 @@
 import { H1, Text } from "@/components/ui/typography";
 import VideoTabs from "@/components/VideoTabs";
+import { BASE_HEAD_TITLE } from "@/lib/constants";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute('/_protected/_protected/videos/')({
-
+  head: () => ({
+    meta: [
+      {
+        name: "title",
+        content: `${BASE_HEAD_TITLE} My Videos`,
+      },
+      {
+        name: "description",
+        content: "Manage your video content and drafts",
+      },
+    ],
+  }),
   component: Videos,
 })
 

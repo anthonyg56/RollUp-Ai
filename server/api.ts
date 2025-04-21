@@ -21,7 +21,7 @@ const api = new Hono<{ Variables: HonoVariables }>()
   .use(
     "/auth/*",
     cors({
-      origin: ["https://rollup-ai.dev", "https://rollup-ai.fly.dev", "http://127.0.0.1:3000", "http://127.0.0.1:5173"],
+      origin: ["https://rollup-ai.dev", "https://rollup-ai.fly.dev", "http://localhost:3000", "http://localhost:5173"],
       allowHeaders: ["Content-Type", "Authorization", "Cookie"],
       allowMethods: ["POST", "GET", "OPTIONS"],
       exposeHeaders: ["Content-Length"],

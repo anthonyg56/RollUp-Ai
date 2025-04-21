@@ -5,6 +5,7 @@ import { twMerge } from "tailwind-merge"
 import { redirect } from "@tanstack/react-router";
 
 import authClient from "@server/auth/authClient";
+import { PUBLIC_ROUTES, AUTH_ROUTES, PROTECTED_ROUTES, PublicRoute, AuthRoute, ProtectedRoute } from "./constants";
 
 const { getSession } = authClient
 
@@ -44,6 +45,18 @@ export const getFileName = (file: File): string => {
   filename = filename.replace(/-/g, " ");
 
   return filename;
+};
+
+export function matchRoutesType(pathname: string, type: "Public" | "Auth" | "Protected") {
+  if (type === "Public") {
+    return PUBLIC_ROUTES.includes(pathname as PublicRoute);
+  } else if (type === "Auth") {
+    return AUTH_ROUTES.includes(pathname as AuthRoute);
+  } else if (type === "Protected") {
+    return PROTECTED_ROUTES.includes(pathname as ProtectedRoute);
+  } else {
+    return false;
+  }
 };
 
 // Helper function to poll for asset ready status

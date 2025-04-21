@@ -7,8 +7,9 @@ import authClient from "@server/auth/authClient";
 import AuthCardFooter from "../AuthCardFooter";
 import { useMutation } from "@tanstack/react-query";
 import { Route as LoginRoute } from "@/routes/_auth/_auth.login";
+import { useRouteContext } from "@tanstack/react-router";
 
-const { signIn, $ERROR_CODES } = authClient;
+const { signIn } = authClient;
 
 const loginFormSchema = z.object({
   email: z.string().min(1, { message: "Email is required" }).email({ message: "Invalid email" }),
@@ -17,6 +18,8 @@ const loginFormSchema = z.object({
 
 export default function LoginForm() {
   const navigate = LoginRoute.useNavigate();
+  const { queryClient } = useRouteContext({ from: "/_auth/_auth/login" });
+
   const form = useAppForm({
     defaultValues: {
       email: "",
@@ -35,8 +38,6 @@ export default function LoginForm() {
         password: data.password,
         fetchOptions: {
           onError: async ({ error }) => {
-            console.log(error?.code);
-            console.log($ERROR_CODES.EMAIL_NOT_VERIFIED.toString());
             if (
               error?.code === "INVALID_EMAIL_OR_PASSWORD" ||
               error?.code === "PASSWORD_TOO_LONG" ||
@@ -44,6 +45,7 @@ export default function LoginForm() {
             ) {
               throw new Error('Invalid email or password');
             } else if (error?.code === "EMAIL_NOT_VERIFIED") {
+              queryClient.invalidateQueries({ queryKey: ["getSession"] });
               navigate({
                 to: "/verify",
                 search: {
@@ -65,6 +67,7 @@ export default function LoginForm() {
       console.log(error);
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["getSession"] });
       navigate({
         to: "/videos",
         search: {

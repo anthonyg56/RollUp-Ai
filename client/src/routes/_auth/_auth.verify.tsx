@@ -5,6 +5,7 @@ import { z } from "zod";
 import VerifyOTPForm from "@/components/forms/VerifyOTPForm";
 import authClient from "@server/auth/authClient";
 import { api } from "@/lib/utils";
+import { BASE_HEAD_TITLE } from "@/lib/constants";
 
 const { getSession, emailOtp } = authClient;
 
@@ -68,5 +69,17 @@ export const Route = createFileRoute('/_auth/_auth/verify')({
       }
     }
   },
+  head: () => ({
+    meta: [
+      {
+        name: "title",
+        content: `${BASE_HEAD_TITLE} Verify Email`,
+      },
+      {
+        name: "description",
+        content: "Verify your email address on Rollup AI",
+      },
+    ],
+  }),
   component: VerifyOTPForm,
 });

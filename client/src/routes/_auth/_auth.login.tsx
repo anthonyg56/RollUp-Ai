@@ -6,6 +6,7 @@ import { fallback } from "@tanstack/zod-adapter";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { toast } from "sonner";
 import { useEffect } from "react";
+import { BASE_HEAD_TITLE } from "@/lib/constants";
 
 export const Route = createFileRoute('/_auth/_auth/login')({
   validateSearch: zodValidator(
@@ -15,6 +16,18 @@ export const Route = createFileRoute('/_auth/_auth/login')({
     })
   ),
   beforeLoad: async () => await handleSessionRedirect(),
+  head: () => ({
+    meta: [
+      {
+        name: "title",
+        content: `${BASE_HEAD_TITLE} Login`,
+      },
+      {
+        name: "description",
+        content: "Login to your account on Rollup AI",
+      },
+    ],
+  }),
   component: Login,
 });
 

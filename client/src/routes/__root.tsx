@@ -1,26 +1,29 @@
-import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
+import { createRootRouteWithContext, Outlet, Scripts } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import type { QueryClient } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { DialogStoreProvider } from '@/components/providers/DialogProvider'
-import ProtectedNavbar from '@/components/ProtectedNavbar'
+import Navbar from '@/components/navbar'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { Toaster } from '@/components/ui/sonner'
+import { HeadContent } from '@tanstack/react-router'
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
 }>()({
   component: () => (
     <>
+      <HeadContent />
       <ThemeProvider>
         <DialogStoreProvider>
-          <ProtectedNavbar />
+          <Navbar />
           <Outlet />
           <Toaster />
         </DialogStoreProvider>
       </ThemeProvider>
+      <Scripts />
       <TanStackRouterDevtools />
-      <ReactQueryDevtools buttonPosition="top-right" />
+      <ReactQueryDevtools buttonPosition="bottom-right" />
     </>
   ),
 })

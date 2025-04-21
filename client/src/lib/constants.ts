@@ -1,3 +1,5 @@
+import { FileRouteTypes } from "@/routeTree.gen";
+
 export const MIN_PASSWORD_LENGTH = 8;
 export const MAX_PASSWORD_LENGTH = 50;
 
@@ -124,5 +126,35 @@ export const surveyReferralSourcesAnswers = [
   },
 ];
 
+export const BASE_HEAD_TITLE = "Rollup AI |";
+
+export const PROTECTED_ROUTES = [
+  "/videos",
+  "/survey",
+  "/videos/$id",
+  "/videos/$id/edit",
+  "/videos/$id/process",
+] as const satisfies readonly FileRouteTypes["fullPaths"][];
+
+export const PUBLIC_ROUTES = [
+  "/",
+  "/privacy",
+  "/terms",
+] as const satisfies readonly FileRouteTypes["fullPaths"][];
+
+export const AUTH_ROUTES = [
+  "/login",
+  "/register",
+  "/forgot",
+  "/reset",
+  "/survey",
+] as const satisfies readonly FileRouteTypes["fullPaths"][];
+
 export type SurveyReferralSource = (typeof SURVEY_REFERRAL_SOURCES)[number];
 export type SurveyIndustry = (typeof SURVEY_INDUSTRIES)[number];
+
+export type ProtectedRoute = (typeof PROTECTED_ROUTES)[number];
+export type PublicRoute = (typeof PUBLIC_ROUTES)[number];
+export type AuthRoute = (typeof AUTH_ROUTES)[number];
+
+export type Route = ProtectedRoute | PublicRoute | AuthRoute;

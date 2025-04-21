@@ -8,6 +8,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { Loader2 } from "lucide-react";
 import { CheckCircle2 } from "lucide-react";
+import { BASE_HEAD_TITLE } from "@/lib/constants";
 
 export const Route = createFileRoute('/_protected/_protected/videos/$id/process')({
   validateSearch: zodValidator(
@@ -15,6 +16,18 @@ export const Route = createFileRoute('/_protected/_protected/videos/$id/process'
       videoId: uuidSchema,
     })
   ),
+  head: () => ({
+    meta: [
+      {
+        name: "title",
+        content: `${BASE_HEAD_TITLE} Process A Video`,
+      },
+      {
+        name: "description",
+        content: "Processing your video on Rollup AI",
+      },
+    ],
+  }),
   component: ProcessVideoPage,
 })
 

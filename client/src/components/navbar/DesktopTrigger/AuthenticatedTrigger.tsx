@@ -4,29 +4,39 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 import { MessageCircle, Moon, Sun, User } from "lucide-react";
 import UserAvatar from "@/components/UserAvatar";
 import { ArrowLeftToLine, ChevronsUpDown, ExternalLink } from "lucide-react";
-import { useTheme } from "@/components/providers/ThemeProvider";
-import { capitalizeFirstLetter } from "@/lib/utils";
+import { useTheme } from "@/hooks/useTheme";
+import { capitalizeFirstLetter, matchRoutesType } from "@/lib/utils";
 import { useDialogStore } from "@/hooks/useStores";
-import authClient from "@server/auth/authClient";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useRouterState } from "@tanstack/react-router";
 import { useNavigate } from "@tanstack/react-router";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-
-const { signOut } = authClient;
+import type { HonoUser } from "@server/types";
 
 interface NavbarAvatarDropdownProps {
-  name: string;
-  email: string;
-  avatarUrl: string;
+  user?: HonoUser;
+  handleLogout: () => void;
 }
 
-export default function NavbarAvatarDropdown({ name, email, avatarUrl }: NavbarAvatarDropdownProps) {
+export default function AuthenticatedTrigger({ user, handleLogout }: NavbarAvatarDropdownProps) {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
 
   const openDialog = useDialogStore(state => state.open);
+  const pathname = useRouterState({ select: (state) => state }).location.pathname;
 
-  const capitalizedEmail = capitalizeFirstLetter(email);
-  const capitalizedName = capitalizeFirstLetter(name);
+  const capitalizedEmail = capitalizeFirstLetter(user?.email || "");
+  const capitalizedName = capitalizeFirstLetter(user?.name || "");
+
+  const isProtectedRoute = matchRoutesType(pathname, "Protected");
+  const isAuthRoute = matchRoutesType(pathname, "Auth");
+
+  function handleBackToPage() {
+    if (isProtectedRoute) {
+      navigate({ to: "/" });
+    } else if (!isAuthRoute) {
+      navigate({ to: "/videos" });
+    }
+  }
 
   return (
     <DropdownMenu>
@@ -34,11 +44,10 @@ export default function NavbarAvatarDropdown({ name, email, avatarUrl }: NavbarA
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex flex-col items-end">
             <span className="text-sm font-medium">{capitalizedName}</span>
-
           </div>
-          <Avatar>
-            <AvatarImage src={avatarUrl} alt="User avatar" />
-            <AvatarFallback>{capitalizedName.charAt(0)}</AvatarFallback>
+          <Avatar className="h-9 w-9 rounded-md">
+            <AvatarImage src={user?.image || undefined} alt="User avatar" className="rounded-md" />
+            <AvatarFallback className="bg-secondary-foreground text-primary-foreground rounded-md">{capitalizedName.charAt(0)}</AvatarFallback>
           </Avatar>
         </div>
         <ChevronsUpDown className="size-4" />
@@ -49,12 +58,12 @@ export default function NavbarAvatarDropdown({ name, email, avatarUrl }: NavbarA
         <DropdownMenuLabel className="p-0 font-normal">
           <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
             <UserAvatar
-              name={name}
-              avatarUrl={avatarUrl}
+              name={capitalizedName}
+              avatarUrl={user?.image || undefined}
               email={capitalizedEmail}
             />
             <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-semibold">{name}</span>
+              <span className="truncate font-semibold">{capitalizedName}</span>
               <span className="truncate text-xs">{capitalizedEmail}</span>
             </div>
           </div>
@@ -80,20 +89,14 @@ export default function NavbarAvatarDropdown({ name, email, avatarUrl }: NavbarA
             )}
             <span>Switch to {theme === "dark" ? "Light" : "Dark"} Mode</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigate({ to: "/" })}>
+          <DropdownMenuItem onClick={handleBackToPage}>
             <ExternalLink className="size-4 mr-2" />
-            <span>Back to Website</span>
+            <span>{isProtectedRoute ? "Back to Website" : "Back to Videos"}</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => signOut({
-            fetchOptions: {
-              onSuccess: () => {
-                navigate({ to: "/login", search: { showToast: true, toastReason: "Logout" } });
-              }
-            }
-          })}>
+          <DropdownMenuItem onClick={handleLogout}>
             <ArrowLeftToLine className="size-4 mr-2" />
             <span>Logout</span>
           </DropdownMenuItem>
