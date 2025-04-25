@@ -10,7 +10,7 @@ import videoRouter from "@server/routes/video.routes";
 import queuesRouter from "@server/routes/queues.routes";
 import feedbackRouter from "@server/routes/feedback.routes";
 import onboardingRouter from "@server/routes/onboarding.routes";
-
+import videoAssetsRouter from "@server/routes/video_assets.routes";
 // Api Utils
 import { auth } from "@server/auth";
 import { checkSession } from "@server/middleware/auth";
@@ -74,6 +74,7 @@ const api = new Hono<{ Variables: HonoVariables }>()
   .route("/feedback", feedbackRouter)
   .route("/onboarding", onboardingRouter)
   .route("/users", userRouter)
-  .route("/videos", videoRouter);
+  .route("/videos", videoRouter)
+  .route("/video_assets", videoAssetsRouter);
 
 export default api;

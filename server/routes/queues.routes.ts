@@ -72,12 +72,14 @@ export default new Hono<{ Variables: HonoVariables }>()
     authorizeRequest,
     zValidator('param', z.object({
       assetId: z.string(),
+    })),
+    zValidator('json', z.object({
       flowJobId: z.string(),
     })),
     async (c) => {
       const user = c.get("user") as HonoUser;
-      const assetId = c.req.param('assetId');
-      const flowJobId = c.req.param('flowJobId');
+      const { assetId } = c.req.valid('param');
+      const { flowJobId } = c.req.valid('json');
 
       if (!assetId) {
         return c.text('Missing Asset ID', 400);

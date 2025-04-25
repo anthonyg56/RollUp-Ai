@@ -66,9 +66,6 @@ export default function NewVideoForm({ setView }: NewVideoFormProps) {
         params: {
           id: videoSubmissionId,
         },
-        search: {
-          videoId: videoSubmissionId,
-        },
       });
     },
     onError: (error) => {

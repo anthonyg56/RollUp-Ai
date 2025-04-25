@@ -36,8 +36,8 @@ export const Route = createFileRoute('/_protected/_protected')({
     }
 
     return {
-      user: user,
-      session: session,
+      user,
+      session,
     }
   },
   component: ProtectedLayout,

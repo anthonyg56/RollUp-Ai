@@ -7,11 +7,11 @@ import { zValidator } from "@hono/zod-validator";
 import { authorizeRequest } from "@server/middleware/auth";
 
 // Schemas
-import { insertVideoSubmissionSchema } from "@server/db/models";
+import { insertVideoSubmissionSchema, videoAssets, videoSubmissions } from "@server/db/models";
 
 // Lib
 import { HonoUser, HonoVariables } from "@server/types";
-import { videoFileSchema } from "@server/lib/schemas";
+import { uuidSchema, videoFileSchema } from "@server/lib/schemas";
 
 // Services
 import { generateObjectKey } from "@server/services/r2";
@@ -21,6 +21,8 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import s3Client from "@server/lib/configs/s3-client";
 import { HTTPException } from "hono/http-exception";
 import { serverLogger } from "@server/lib/configs/logger";
+import db from "@server/db";
+import { eq, getTableColumns } from "drizzle-orm";
 
 export default new Hono<{ Variables: HonoVariables }>()
   .post(
@@ -81,4 +83,45 @@ export default new Hono<{ Variables: HonoVariables }>()
         },
       });
     }
-  );
+  )
+  .get(
+    "/submission/:id",
+    authorizeRequest,
+    zValidator("param",
+      z.object({
+        id: uuidSchema,
+      }),
+    ),
+    async function (c) {
+      const { id } = c.req.valid("param");
+
+      const videoSubmission = await db
+        .select({
+          ...getTableColumns(videoSubmissions),
+          assetId: videoAssets.id,
+        })
+        .from(videoSubmissions)
+        .innerJoin(videoAssets, eq(videoSubmissions.id, videoAssets.videoSubmissionId))
+        .where(eq(videoSubmissions.id, id))
+        .limit(1)
+        .then(result => result[0])
+        .catch(err => {
+          serverLogger.error(`Error fetching video asset by ID: ${id}`, {
+            error: err,
+            stack: err instanceof Error ? err.stack : undefined,
+          });
+
+          throw new HTTPException(500, {
+            message: "Failed to fetch video asset",
+            cause: err,
+          });
+        });
+
+      return c.json({
+        message: "Video asset fetched successfully",
+        data: {
+          videoSubmission,
+        },
+      });
+    }
+  ) 
