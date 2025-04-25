@@ -1,12 +1,14 @@
 import LoginForm from "@/components/forms/LoginForm";
-import { createFileRoute } from "@tanstack/react-router";
-import { handleSessionRedirect } from "@/lib/utils";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { z } from "zod";
 import { fallback } from "@tanstack/zod-adapter";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { toast } from "sonner";
 import { useEffect } from "react";
 import { BASE_HEAD_TITLE } from "@/lib/constants";
+import authClient from "@/lib/authClient";
+
+const { getSession } = authClient;
 
 export const Route = createFileRoute('/_auth/_auth/login')({
   validateSearch: zodValidator(
@@ -15,7 +17,13 @@ export const Route = createFileRoute('/_auth/_auth/login')({
       toastReason: fallback(z.string(), "").default(""),
     })
   ),
-  beforeLoad: async () => await handleSessionRedirect(),
+  beforeLoad: async () => {
+    const { data } = await getSession()
+
+    if (data !== null) {
+      throw redirect({ to: '/videos' })
+    }
+  },
   head: () => ({
     meta: [
       {
@@ -29,6 +37,11 @@ export const Route = createFileRoute('/_auth/_auth/login')({
     ],
   }),
   component: Login,
+  errorComponent: ({ error }) => {
+    console.log(error);
+
+    return <div>{error.message}</div>
+  },
 });
 
 function Login() {

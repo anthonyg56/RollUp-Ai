@@ -1,4 +1,4 @@
-import authClient from "@server/auth/authClient";
+import authClient from "@/lib/authClient";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { z } from "zod";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
@@ -12,14 +12,14 @@ export const Route = createFileRoute('/_auth/_auth/reset')({
     otp: fallback(z.string(), "invalid_otp").default("invalid_otp"),
   })),
   beforeLoad: async () => {
-    const session = await getSession()
+    const { data, error } = await getSession()
 
-    if (!session.data || (!session.data.user || !session.data.session)) {
+    if (!data || error) {
       throw redirect({ to: '/login' });
     };
 
     return {
-      email: session.data.user.email,
+      email: data.user.email,
     }
   },
   loader: async ({ context }) => {

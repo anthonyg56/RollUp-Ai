@@ -2,13 +2,13 @@ import { pgEnum, pgTable, uuid, text, index } from "drizzle-orm/pg-core";
 import { videoSubmissions } from "@server/db/models/videos_submission";
 import { timestamps } from "@server/db/utils";
 import { relations } from "drizzle-orm";
-import { VIDEO_ASSET_TYPES } from "@server/lib/constants";
+import { ASSET_TYPES } from "@server/lib/constants";
 import { videoProcessingJobs } from "./video_processing_jobs";
 import { videoTranscripts } from "./video_transcripts";
 import { videoTechnicalMetadatas } from "./video_technical_metadatas";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod";
 
-export const assetTypeEnum = pgEnum("asset_type", VIDEO_ASSET_TYPES);
+export const assetTypeEnum = pgEnum("asset_type", ASSET_TYPES);
 
 export const videoAssets = pgTable(
   "video_assets",

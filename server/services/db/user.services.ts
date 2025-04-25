@@ -21,12 +21,13 @@ export async function updateUserTour(id: string) {
 };
 
 export async function getUserByEmail(email: string) {
-  return await db.query.users.findFirst({
-    where: eq(users.email, email),
-    columns: {
-      email: true,
-      id: true,
-      emailVerified: true,
-    },
-  });
+  const user = await db
+    .select()
+    .from(users)
+    .where(
+      eq(users.email, email)
+    )
+    .limit(1);
+
+  return user[0];
 };

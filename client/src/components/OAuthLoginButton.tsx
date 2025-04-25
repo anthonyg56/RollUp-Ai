@@ -3,7 +3,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { Button, ShadcnButtonProps } from "./ui/button";
 import { capitalizeFirstLetter } from "@/lib/utils";
-import authClient from "@server/auth/authClient";
+import authClient from "@/lib/authClient";
 import { BASE_URL } from "@/lib/constants";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";

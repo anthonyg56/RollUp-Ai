@@ -8,7 +8,7 @@ import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/utils";
 import { toast } from "sonner";
 import { useStore } from "@tanstack/react-form";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useRouteContext } from "@tanstack/react-router";
 
 const onboardingSurveySchema = z.object({
   referralSource: surveyReferralSourceSchema,
@@ -23,6 +23,7 @@ const onboardingSurveySchema = z.object({
 
 export default function OnboardingSurveryForm() {
   const navigate = useNavigate();
+  const { queryClient } = useRouteContext({ from: "__root__" });
 
   const form = useAppForm({
     defaultValues: {
@@ -64,6 +65,7 @@ export default function OnboardingSurveryForm() {
     },
     onSuccess: () => {
       toast.success("Onboarding survey submitted successfully");
+      queryClient.invalidateQueries({ queryKey: ["getSession"] });
       navigate({ to: "/videos", from: "/survey" });
     }
   });
@@ -90,6 +92,7 @@ export default function OnboardingSurveryForm() {
     },
     onSuccess: () => {
       toast.success("Onboarding survey skipped successfully");
+      queryClient.invalidateQueries({ queryKey: ["getSession"] });
       navigate({ to: "/videos", from: "/survey" });
     }
   });

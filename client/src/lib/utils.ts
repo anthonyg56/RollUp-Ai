@@ -4,7 +4,7 @@ import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { redirect } from "@tanstack/react-router";
 
-import authClient from "@server/auth/authClient";
+import authClient from "@/lib/authClient";
 import { PUBLIC_ROUTES, AUTH_ROUTES, PROTECTED_ROUTES, PublicRoute, AuthRoute, ProtectedRoute } from "./constants";
 
 const { getSession } = authClient
@@ -131,8 +131,6 @@ export const handleSessionRedirect = async () => {
   if (session.data && session.data.user) {
     if (session.data.user.emailVerified === false) {
       throw redirect({ to: '/verify' })
-    } else if (session.data.user.showOnboardingSurvey) {
-      throw redirect({ to: '/survey' })
     } else {
       throw redirect({ to: '/videos' })
     }

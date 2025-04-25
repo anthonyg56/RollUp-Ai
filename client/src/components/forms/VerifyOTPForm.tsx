@@ -8,7 +8,7 @@ import { FieldErrorInfo } from "./formFields";
 import { Text } from "../ui/typography";
 import ResendOTPButton from "../ResendOTPButton";
 import { Route as VerifyOTPRoute } from "@/routes/_auth/_auth.verify";
-import authClient from "@server/auth/authClient";
+import authClient from "@/lib/authClient";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { CheckCircle, Send } from "lucide-react";

@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
-import authClient from "@server/auth/authClient";
+import authClient from "@/lib/authClient";
 import { Text } from "./ui/typography";
 
 const { emailOtp } = authClient;

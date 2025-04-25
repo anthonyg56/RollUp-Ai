@@ -1,9 +1,6 @@
+import { serverLogger } from '@server/lib/configs/logger';
 import ffmpeg from 'fluent-ffmpeg';
 import { unlink } from 'node:fs/promises';
-import { createTmpPath } from '@server/services/fs-io';
-import { pipeAssetToPath } from '@server/services/r2';
-import { insertVideoMetadata } from '@server/services/db/video_metadata.services';
-import { VideoTechnicalMetadata } from '@server/db/models';
 
 const optimizeVideoDefaultOptions = {
   maxWidth: 1920,
@@ -20,11 +17,8 @@ const optimizeVideoDefaultOptions = {
  * 
  * @returns The path to the optimized video asset
  */
-export async function optimizeVideo(assetR2Key: string, options = optimizeVideoDefaultOptions) {
-  const inputPath = await pipeAssetToPath(assetR2Key, "original_videos");
-  const outputPath = await createTmpPath(`optimized_video/output-${Date.now()}.mp4`);
-
-  return new Promise<string>((resolve, reject) => {
+export async function optimizeVideo(inputPath: string, outputPath: string, options = optimizeVideoDefaultOptions) {
+  return new Promise<boolean>((resolve, reject) => {
     ffmpeg(inputPath)
       // Video settings
       .videoCodec('libx264')        // H.264 codec - great balance of quality/compression
@@ -50,14 +44,9 @@ export async function optimizeVideo(assetR2Key: string, options = optimizeVideoD
 
       // Events
       .on('end', async () => {
-        await unlink(inputPath).catch(() => { });
-
-        resolve(outputPath);
+        resolve(true);
       })
       .on('error', async (err) => {
-        await unlink(inputPath).catch(() => { });
-        await unlink(outputPath).catch(() => { });
-
         reject(err);
       })
       .run();
@@ -72,17 +61,24 @@ export async function optimizeVideo(assetR2Key: string, options = optimizeVideoD
  * 
  * @returns The technical metadata of the video asset
  */
-export async function extractVideoMetadata(assetR2Key: string, assetId: string) {
-  const inputPath = await pipeAssetToPath(assetR2Key, "optimized_videos");
-
-  return new Promise<VideoTechnicalMetadata>(async (resolve, reject) => {
+export async function extractVideoMetadata(inputPath: string) {
+  return new Promise<{
+    fps: number;
+    aspectRatio: string;
+    duration: number;
+    width: number;
+    height: number;
+    videoCodec: string;
+    audioCodec: string | null;
+    bitrate: number;
+    audioChannels: number;
+    audioSampleRate: number;
+  }>(async (resolve, reject) => {
     ffmpeg.ffprobe(inputPath, async (err, metadata) => {
       try {
         if (err) {
           throw err;
         }
-
-        await unlink(inputPath).catch(() => { });
 
         const videoStream = metadata.streams.find(stream => stream.codec_type === 'video');
         const audioStream = metadata.streams.find(stream => stream.codec_type === 'audio');
@@ -104,9 +100,8 @@ export async function extractVideoMetadata(assetR2Key: string, assetId: string) 
           fps = denominator ? numerator / denominator : numerator;
         };
 
-        const videoMetadata = await insertVideoMetadata({
+        const videoMetadata = {
           fps,
-          assetId,
           aspectRatio,
           duration: metadata.format.duration ? parseFloat(metadata.format.duration.toString()) : 0,
           width: videoStream.width || 0,
@@ -116,12 +111,10 @@ export async function extractVideoMetadata(assetR2Key: string, assetId: string) 
           bitrate: metadata.format.bit_rate ? parseInt(metadata.format.bit_rate.toString()) : 0,
           audioChannels: audioStream?.channels || 0,
           audioSampleRate: audioStream?.sample_rate ? parseInt(audioStream.sample_rate.toString()) : 0,
-        });
+        };
 
         resolve(videoMetadata);
       } catch (err) {
-        await unlink(inputPath).catch(() => { });
-
         reject(err);
       }
     });
@@ -137,26 +130,19 @@ export async function extractVideoMetadata(assetR2Key: string, assetId: string) 
  * 
  * @returns The path to the thumbnail
  */
-export async function generateThumbnail(inputPath: string, size = '640x360') {
-  const outputPath = await createTmpPath(`thumbnails`);
-
+export async function generateThumbnail(inputPath: string, outputPath: string, filename: string, size = '640x360') {
   return new Promise<string>((resolve, reject) => {
     ffmpeg(inputPath)
       .screenshots({
         timestamps: ['10%'],
-        filename: `thumbnail-${Date.now()}.png`,
+        filename: filename,
         size: size,
         folder: outputPath,
       })
       .on('end', async () => {
-        await unlink(inputPath).catch(() => { });
-
         resolve(outputPath);
       })
       .on('error', async (err) => {
-        await unlink(inputPath).catch(() => { });
-        await unlink(outputPath).catch(() => { });
-
         reject(err);
       })
       .run();
@@ -172,9 +158,7 @@ export async function generateThumbnail(inputPath: string, size = '640x360') {
  * 
  * @returns The SRT and plain text transcripts
  */
-export async function extractAudio(inputPath: string) {
-  const outputPath = await createTmpPath(`audio/output-${Date.now()}.mp3`);
-
+export async function extractAudio(inputPath: string, outputPath: string) {
   return new Promise<string>(async (resolve, reject) => {
     ffmpeg(inputPath)
       .outputOptions([
@@ -187,8 +171,6 @@ export async function extractAudio(inputPath: string) {
       .output(outputPath)
       .on('end', () => resolve(outputPath))
       .on('error', async (err) => {
-        await unlink(outputPath).catch(() => { });
-
         reject(err);
       })
       .run()
@@ -204,14 +186,8 @@ export async function extractAudio(inputPath: string) {
  * 
  * @returns The path to the captioned video asset
  */
-export async function burnCaptions(videoInputPath: string, srtTranscript: string, videoAssetId: string) {
-  const srtPath = await createTmpPath(`srt/temp-${Date.now()}.srt`);
-  await Bun.write(srtPath, srtTranscript);
-
-  // Create output path
-  const outputPath = await createTmpPath(`captioned_video/output-${videoAssetId}-${Date.now()}.mp4`);
-
-  return new Promise<string>((resolve, reject) => {
+export async function burnCaptions(videoInputPath: string, outputPath: string, srtPath: string) {
+  return new Promise<boolean>((resolve, reject) => {
     ffmpeg(videoInputPath)
       .videoCodec('libx264')
       .addOptions([
@@ -226,18 +202,42 @@ export async function burnCaptions(videoInputPath: string, srtTranscript: string
       .audioCodec('copy')
       .output(outputPath)
       .on('end', async () => {
-        await unlink(srtPath).catch(() => { });
-
-        resolve(outputPath);
+        resolve(true);
       })
       .on('error', async (err) => {
-        await unlink(srtPath).catch(() => { });
-        await unlink(outputPath).catch(() => { });
-
-        reject(err);
+        reject(true);
       })
       .run();
   });
 }
 
-
+export async function addBroll(
+  startSeconds: number,
+  endSeconds: number,
+  paths: {
+    inputPath: string,
+    outputPath: string,
+    brollPath: string
+  },
+) {
+  await new Promise<void>((resolve, reject) => {
+    ffmpeg()
+      .input(paths.inputPath)
+      .input(paths.brollPath)
+      .complexFilter([
+        `[1:v]scale=640:360[overlay]`,
+        `[0:v][overlay]overlay=main_w-overlay_w-10:main_h-overlay_h-10:enable='between(t,${startSeconds},${endSeconds})'[outv]`
+      ])
+      .map('[outv]')
+      .outputOptions('-c:a copy')
+      .save(paths.outputPath)
+      .on('end', () => {
+        serverLogger.info(`Successfully added B-roll`);
+        resolve();
+      })
+      .on('error', (err) => {
+        serverLogger.error(`Error adding B-roll: ${err.message}`);
+        reject(new Error(`FFmpeg processing failed: ${err.message}`));
+      });
+  });
+}

@@ -1,16 +1,15 @@
 import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import s3Client from "@server/lib/configs/s3-client";
 import { HTTPException } from "hono/http-exception";
-import { BunFile } from "bun";
-import { R2Bucket } from "@server/lib/constants";
+import { AssetBucket } from "@server/lib/constants";
 import { createWriteStream, WriteStream } from "node:fs";
-import { createTmpPath } from "./fs-io";
+import { createStreamFromPath } from "@server/services/FileIO.service";
 import { IncomingMessage } from "node:http";
 import { SdkStream } from "@aws-sdk/types";
 import { serverLogger } from "@server/lib/configs/logger";
 import { handleError } from "@server/lib/utils";
 
-export const getVideoAsset = async (key: string, bucket: R2Bucket) => {
+export const getR2Obj = async (key: string, bucket: AssetBucket) => {
   const getObjectCommand = new GetObjectCommand({
     Bucket: bucket,
     Key: key,
@@ -35,21 +34,18 @@ export const getVideoAsset = async (key: string, bucket: R2Bucket) => {
   return Body
 }
 
-export const putVideoAsset = async (file: File | BunFile, bucket: R2Bucket) => {
-  if (!file.name) {
-    throw new HTTPException(400, {
-      message: "File name is required",
-    });
-  };
+export const uploadR2Obj = async (inputPath: string, fileName: string, bucket: AssetBucket) => {
+  const stream = await createStreamFromPath(inputPath, 'read');
 
-  const key = generateObjectKey(file.name);
+  const key = generateObjectKey(fileName);
+  const contentType = Bun.file(inputPath).type;
 
   const { ETag } = await s3Client.send(
     new PutObjectCommand({
       Bucket: bucket,
       Key: key,
-      Body: file,
-      ContentType: file.type,
+      Body: stream,
+      ContentType: contentType,
     }))
     .catch(err => {
       serverLogger.error(err);
@@ -72,13 +68,12 @@ export const putVideoAsset = async (file: File | BunFile, bucket: R2Bucket) => {
   };
 };
 
-export const pipeAssetToPath = async (assetR2Key: string, bucket: R2Bucket) => {
+export const writeR2ObjToFile = async (assetR2Key: string, bucket: AssetBucket, inputPath: string) => {
   let stream: SdkStream<IncomingMessage> | undefined;
   let writeStream: WriteStream | undefined;
 
   try {
-    stream = await getVideoAsset(assetR2Key, bucket);
-    const inputPath = await createTmpPath(`${bucket}/input-${assetR2Key}`);
+    stream = await getR2Obj(assetR2Key, bucket);
     writeStream = createWriteStream(inputPath);
 
     await new Promise((resolve, reject) => {
@@ -91,7 +86,7 @@ export const pipeAssetToPath = async (assetR2Key: string, bucket: R2Bucket) => {
         .pipe(writeStream!);
     });
 
-    return inputPath;
+    return;
   } catch (error) {
     throw handleError(error, "Failed to create stream from asset");
   } finally {

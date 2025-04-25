@@ -1,6 +1,5 @@
 import { betterAuth } from "better-auth";
-import { customSession, emailOTP } from "better-auth/plugins";
-import { HTTPException } from "hono/http-exception";
+import { emailOTP } from "better-auth/plugins";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 
 import db from "@server/db";
@@ -12,11 +11,10 @@ import { sessions } from "@server/db/models/sessions";
 import { accounts } from "@server/db/models/accounts";
 import { verifications } from "@server/db/models/verifications";
 
-import { getUserById } from "@server/services/db/user.services";
 import { resendOTPCode } from "@server/emails/sendVerification";
 import { sendWelcomeEmail } from "@server/emails/sendEmail";
 
-export type AuthType = typeof auth;
+export type Auth = typeof auth;
 
 export const auth = betterAuth({
   baseUrl: process.env.BETTER_AUTH_URL || "http://localhost:3000",
@@ -184,27 +182,6 @@ export const auth = betterAuth({
       async sendVerificationOTP({ email, otp, type }) {
         await resendOTPCode({ email, code: otp, type });
       },
-    }),
-    customSession(async ({ user: userFromSession, session }) => {
-      const results = await getUserById(userFromSession.id);
-
-      if (!results) {
-        throw new HTTPException(404, {
-          message: "User not found",
-          cause: new Error("User not found"),
-        });
-      }
-
-      return {
-        session: {
-          ...session,
-        },
-        user: {
-          ...userFromSession,
-          showOnboardingSurvey: results.showOnboardingSurvey || false,
-          showWelcomeTour: results.showWelcomeTour || true,
-        },
-      };
     }),
   ],
 });

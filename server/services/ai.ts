@@ -1,47 +1,27 @@
 import OpenAI from "openai";
-import { convertFileToStream, createTmpPath } from "./fs-io";
-import { unlink } from "node:fs/promises";
+import { createStreamFromPath } from "@server/services/FileIO.service";
 
 const openAIClient = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export async function generateTranscripts(outputPath: string) {
-  const audioFile = Bun.file(outputPath);
-  const audioFileStream = await convertFileToStream(audioFile, 'read');
+export async function generateTranscripts(inputPath: string, format: 'srt' | 'text') {
+  const audioFileStream = await createStreamFromPath(inputPath, 'read');
 
-  const [srtTranscript, plainTranscript] = await Promise.all([
-    openAIClient
-      .audio
-      .transcriptions
-      .create({
-        file: audioFileStream,
-        model: "whisper-1",
-        response_format: "srt",
-        language: "en",
-      }),
-    openAIClient
-      .audio
-      .transcriptions
-      .create({
-        file: audioFileStream,
-        model: "whisper-1",
-        response_format: "text",
-        language: "en",
-      }),
-  ]);
+  const transcript = await openAIClient
+    .audio
+    .transcriptions
+    .create({
+      file: audioFileStream,
+      model: "whisper-1",
+      response_format: format,
+      language: "en",
+    });
 
-  audioFileStream.destroy();
-
-  await unlink(outputPath).catch(() => { });
-
-  return {
-    srtTranscript,
-    plainTranscript,
-  };
+  return transcript;
 };
 
-export type TranscriptAnalysis = {
+export type KeywordsResponse = {
   count: number;
   summary: string;
   topics: Array<{
@@ -52,13 +32,13 @@ export type TranscriptAnalysis = {
     start: string;
     end: string;
     keywords: {
-      mood: string[6];
-      topic: string[6];
+      mood: string[];
+      topic: string[];
     };
   }>;
 };
 
-export async function generateKeywords(srtTranscript: string): Promise<TranscriptAnalysis> {
+export async function generateKeywords(srtTranscript: string): Promise<KeywordsResponse> {
   const prompt = `
     You are an expert Video Content Analyzer and Topic Extractor. Your primary task is to process the provided SRT transcript, identify distinct conversational topics, analyze each topic, and structure the results in a specific JSON format.
 

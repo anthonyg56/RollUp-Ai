@@ -13,7 +13,7 @@ export default function UnauthenticatedTrigger() {
         <Link to="/login">Login</Link>
       </Button>
       <Button asChild>
-        <Link to="/register">Sign up</Link>
+        <Link to="/register">Join Now</Link>
       </Button>
     </div>
   )

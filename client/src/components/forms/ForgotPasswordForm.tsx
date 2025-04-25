@@ -4,7 +4,7 @@ import { emailSchema } from "@/lib/schemas/base";
 import { z } from "zod";
 import AuthCardFooter from "../AuthCardFooter";
 import { useMutation } from "@tanstack/react-query";
-import authClient from "@server/auth/authClient";
+import authClient from "@/lib/authClient";
 import { useNavigate } from "@tanstack/react-router";
 
 const { emailOtp } = authClient

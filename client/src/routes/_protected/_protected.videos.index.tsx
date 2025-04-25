@@ -21,7 +21,7 @@ export const Route = createFileRoute('/_protected/_protected/videos/')({
 
 function Videos() {
   return (
-    <div className="container mx-auto py-6 space-y-8">
+    <div className="container mx-auto py-6 space-y-8 px-4 md:px-0">
       <div>
         <H1>My Videos</H1>
         <Text variant="muted">Manage your video content and drafts</Text>

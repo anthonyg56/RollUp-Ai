@@ -1,4 +1,4 @@
-import authClient from '@server/auth/authClient'
+import authClient from '@/lib/authClient'
 import { createFileRoute, Outlet, redirect, stripSearchParams } from '@tanstack/react-router'
 import { toast } from 'sonner';
 import { useEffect } from 'react';
@@ -15,23 +15,29 @@ export const Route = createFileRoute('/_protected/_protected')({
     })
   ),
   beforeLoad: async () => {
-    try {
-      const session = await getSession()
+    const { data, error } = await getSession();
 
-      if (session.data && session.data.user) {
-        if (session.data.user.emailVerified === false) {
-          throw redirect({ to: '/verify' })
-        } else if (session.data.user.showOnboardingSurvey === true) {
-          throw redirect({ to: '/survey' })
+    if (data === null || error) {
+      throw redirect({
+        to: '/login',
+        search: {
+          showToast: true,
+          toastReason: 'You must be logged in to access this page.'
         }
-      }
+      });
+    };
 
-      return {
-        user: session.data?.user,
-        session: session.data?.session,
-      }
-    } catch (error) {
-      console.error(error)
+    const { user, session } = data;
+
+    if (user.emailVerified === false) {
+      throw redirect({ to: '/verify' });
+    } else if (user.showOnboardingSurvey === true) {
+      throw redirect({ to: '/survey' })
+    }
+
+    return {
+      user: user,
+      session: session,
     }
   },
   component: ProtectedLayout,

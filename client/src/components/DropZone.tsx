@@ -110,7 +110,7 @@ export default function DropZone({ setView }: DropZoneProps) {
 
   return (
     <div
-      className={cn("border-2 border-dashed rounded-lg p-12 text-center transition-colors w-[525px] md:w-[800px]", {
+      className={cn("border-2 border-dashed rounded-lg p-12 text-center transition-colors w-[325px] md:w-[800px]", {
         "border-destructive bg-destructive/5": fileError,
         "border-primary bg-primary/5": isDragging,
         "border-muted-foreground/25": !fileError && !isDragging

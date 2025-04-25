@@ -3,7 +3,7 @@ import { PASSWORD_REQUIREMENTS } from "@/lib/constants";
 import { z } from "zod";
 import { Route as ResetPasswordRoute } from "@/routes/_auth/_auth.reset";
 import { useMutation } from "@tanstack/react-query";
-import authClient from "@server/auth/authClient";
+import authClient from "@/lib/authClient";
 
 const { emailOtp } = authClient;
 

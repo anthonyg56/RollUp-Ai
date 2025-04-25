@@ -28,8 +28,6 @@ export const ERROR_CODES = {
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];
 
-
-
 export const SURVEY_REFERRAL_SOURCES = [
   'search_engine',
   'social_media',
@@ -147,7 +145,6 @@ export const AUTH_ROUTES = [
   "/register",
   "/forgot",
   "/reset",
-  "/survey",
 ] as const satisfies readonly FileRouteTypes["fullPaths"][];
 
 export type SurveyReferralSource = (typeof SURVEY_REFERRAL_SOURCES)[number];

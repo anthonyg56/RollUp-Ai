@@ -13,7 +13,7 @@ import { HonoUser, HonoVariables } from "@server/types";
 import { insertOnboardingSurveySchema } from "@server/db/models";
 
 // Services
-import { updateUserTour } from "@server/services/db/user.services";
+import { getUserById, updateUserTour } from "@server/services/db/user.services";
 import { verifyOnboardingSurvey } from "@server/services/db/onboarding_survey.services";
 import { insertOnboardingSurveyAnswers, skipOnboardingSurvey } from "@server/services/db/onboarding_survey.services";
 
@@ -39,7 +39,7 @@ export default new Hono<{ Variables: HonoVariables }>()
     async function (c) {
       const user = c.get("user") as HonoUser;
 
-      const surveyAnswers = await verifyOnboardingSurvey(user.id)
+      const userData = await getUserById(user.id)
         .then(data => {
           return data;
         })
@@ -51,10 +51,17 @@ export default new Hono<{ Variables: HonoVariables }>()
           });
         });
 
+      if (!userData) {
+        throw new HTTPException(404, {
+          message: "User not found",
+          res: c.res,
+        });
+      }
+
       return c.json({
         message: "Survey submitted successfully",
         data: {
-          hasSubmitted: surveyAnswers.success,
+          hasSubmitted: userData.showOnboardingSurvey,
         },
       });
     }

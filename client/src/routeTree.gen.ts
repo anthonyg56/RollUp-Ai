@@ -17,6 +17,7 @@ import { Route as AuthAuthImport } from './routes/_auth/_auth'
 import { Route as PublicPublicIndexImport } from './routes/_public/_public.index'
 import { Route as PublicPublicTermsImport } from './routes/_public/_public.terms'
 import { Route as PublicPublicPrivacyImport } from './routes/_public/_public.privacy'
+import { Route as PublicPublicPricingImport } from './routes/_public/_public.pricing'
 import { Route as ProtectedProtectedVideosImport } from './routes/_protected/_protected.videos'
 import { Route as AuthAuthVerifyImport } from './routes/_auth/_auth.verify'
 import { Route as AuthAuthSurveyImport } from './routes/_auth/_auth.survey'
@@ -61,6 +62,12 @@ const PublicPublicTermsRoute = PublicPublicTermsImport.update({
 const PublicPublicPrivacyRoute = PublicPublicPrivacyImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => PublicPublicRoute,
+} as any)
+
+const PublicPublicPricingRoute = PublicPublicPricingImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => PublicPublicRoute,
 } as any)
 
@@ -209,6 +216,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedProtectedVideosImport
       parentRoute: typeof ProtectedProtectedImport
     }
+    '/_public/_public/pricing': {
+      id: '/_public/_public/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PublicPublicPricingImport
+      parentRoute: typeof PublicPublicImport
+    }
     '/_public/_public/privacy': {
       id: '/_public/_public/privacy'
       path: '/privacy'
@@ -331,12 +345,14 @@ const ProtectedProtectedRouteWithChildren =
   ProtectedProtectedRoute._addFileChildren(ProtectedProtectedRouteChildren)
 
 interface PublicPublicRouteChildren {
+  PublicPublicPricingRoute: typeof PublicPublicPricingRoute
   PublicPublicPrivacyRoute: typeof PublicPublicPrivacyRoute
   PublicPublicTermsRoute: typeof PublicPublicTermsRoute
   PublicPublicIndexRoute: typeof PublicPublicIndexRoute
 }
 
 const PublicPublicRouteChildren: PublicPublicRouteChildren = {
+  PublicPublicPricingRoute: PublicPublicPricingRoute,
   PublicPublicPrivacyRoute: PublicPublicPrivacyRoute,
   PublicPublicTermsRoute: PublicPublicTermsRoute,
   PublicPublicIndexRoute: PublicPublicIndexRoute,
@@ -355,6 +371,7 @@ export interface FileRoutesByFullPath {
   '/survey': typeof AuthAuthSurveyRoute
   '/verify': typeof AuthAuthVerifyRoute
   '/videos': typeof ProtectedProtectedVideosRouteWithChildren
+  '/pricing': typeof PublicPublicPricingRoute
   '/privacy': typeof PublicPublicPrivacyRoute
   '/terms': typeof PublicPublicTermsRoute
   '/': typeof PublicPublicIndexRoute
@@ -372,6 +389,7 @@ export interface FileRoutesByTo {
   '/reset': typeof AuthAuthResetRoute
   '/survey': typeof AuthAuthSurveyRoute
   '/verify': typeof AuthAuthVerifyRoute
+  '/pricing': typeof PublicPublicPricingRoute
   '/privacy': typeof PublicPublicPrivacyRoute
   '/terms': typeof PublicPublicTermsRoute
   '/': typeof PublicPublicIndexRoute
@@ -393,6 +411,7 @@ export interface FileRoutesById {
   '/_auth/_auth/survey': typeof AuthAuthSurveyRoute
   '/_auth/_auth/verify': typeof AuthAuthVerifyRoute
   '/_protected/_protected/videos': typeof ProtectedProtectedVideosRouteWithChildren
+  '/_public/_public/pricing': typeof PublicPublicPricingRoute
   '/_public/_public/privacy': typeof PublicPublicPrivacyRoute
   '/_public/_public/terms': typeof PublicPublicTermsRoute
   '/_public/_public/': typeof PublicPublicIndexRoute
@@ -413,6 +432,7 @@ export interface FileRouteTypes {
     | '/survey'
     | '/verify'
     | '/videos'
+    | '/pricing'
     | '/privacy'
     | '/terms'
     | '/'
@@ -429,6 +449,7 @@ export interface FileRouteTypes {
     | '/reset'
     | '/survey'
     | '/verify'
+    | '/pricing'
     | '/privacy'
     | '/terms'
     | '/'
@@ -448,6 +469,7 @@ export interface FileRouteTypes {
     | '/_auth/_auth/survey'
     | '/_auth/_auth/verify'
     | '/_protected/_protected/videos'
+    | '/_public/_public/pricing'
     | '/_public/_public/privacy'
     | '/_public/_public/terms'
     | '/_public/_public/'
@@ -505,6 +527,7 @@ export const routeTree = rootRoute
     "/_public/_public": {
       "filePath": "_public/_public.tsx",
       "children": [
+        "/_public/_public/pricing",
         "/_public/_public/privacy",
         "/_public/_public/terms",
         "/_public/_public/"
@@ -541,6 +564,10 @@ export const routeTree = rootRoute
         "/_protected/_protected/videos/$id",
         "/_protected/_protected/videos/"
       ]
+    },
+    "/_public/_public/pricing": {
+      "filePath": "_public/_public.pricing.tsx",
+      "parent": "/_public/_public"
     },
     "/_public/_public/privacy": {
       "filePath": "_public/_public.privacy.tsx",

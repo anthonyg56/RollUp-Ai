@@ -93,3 +93,37 @@ export const databaseLogger = createLogger({
     }),
   ],
 });
+
+export const filesystemLogger = createLogger({
+  level: process.env.LOG_LEVEL_FILESYSTEM || "info",
+  format: combine(label({ label: "Filesystem" }), fileFormat),
+  transports: [
+    consoleTransport,
+    new transports.File({
+      filename: path.join(logDirectory, "filesystem-combined.log"),
+      format: fileFormat,
+    }),
+    new transports.File({
+      filename: path.join(logDirectory, "filesystem-error.log"),
+      level: "error",
+      format: fileFormat,
+    }),
+  ],
+});
+
+export const streamingLogger = createLogger({
+  level: process.env.LOG_LEVEL_STREAMING || "info",
+  format: combine(label({ label: "Streaming" }), fileFormat),
+  transports: [
+    consoleTransport,
+    new transports.File({
+      filename: path.join(logDirectory, "streaming-combined.log"),
+      format: fileFormat,
+    }),
+    new transports.File({
+      filename: path.join(logDirectory, "streaming-error.log"),
+      level: "error",
+      format: fileFormat,
+    }),
+  ],
+})

@@ -9,8 +9,9 @@ import OAuthLoginButton from "@/components/OAuthLoginButton";
 import AuthCardFooter from "@/components/AuthCardFooter";
 import { PASSWORD_REQUIREMENTS } from "@/lib/constants";
 import { useMutation } from "@tanstack/react-query";
-import authClient from "@server/auth/authClient";
+import authClient from "@/lib/authClient";
 import { useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
 
 const { signUp } = authClient;
 
@@ -56,14 +57,18 @@ export default function RegisterForm() {
 
       return response;
     },
-    onSuccess: () => {
+    onSuccess: ({ user }) => {
       navigate({
         to: "/verify",
         search: {
           type: "email-verification",
+          email: user.email,
         }
       });
     },
+    onError: () => {
+      toast.error("Failed to register. Please try again.");
+    }
   });
 
   const disableForm = isPending || isSuccess;

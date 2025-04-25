@@ -40,7 +40,7 @@ export function MobileDrawer({ user, handleLogout }: MobileDrawerProps) {
       </SheetTrigger>
       <SheetContent side="bottom" className={cn(["h-[55vh] rounded-t-xl px-0 gap-y-0", {
         "h-[30vh]": !user,
-        "h-[33vh]": user,
+        "h-[45vh]": user,
       }])}>
         <SheetHeader className="px-4 pb-0">
           {user ? (

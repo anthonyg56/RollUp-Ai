@@ -1,39 +1,41 @@
-import { Input } from "@/components/ui/input";
-
-import { Button } from "@/components/ui/button";
-import { FeatureCard } from "./FeatureCard";
-import { ChevronRight } from "lucide-react";
-import { StatCard } from "./StatCard";
-import TestimonialCard from "./TestimonialCard";
-
-import { Link } from "@tanstack/react-router";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { FeatureCard } from "@/pages/public/home/FeatureCard"
+import { ChevronRight } from "lucide-react"
+import { StatCard } from "@/pages/public/home/StatCard"
+import TestimonialCard from "@/pages/public/home/TestimonialCard"
+import { Link } from "@tanstack/react-router"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
 export default function HomePage() {
   return (
     <main className="flex min-h-screen flex-col">
       {/* Hero Section */}
-      <section className="py-20 px-4 md:px-6 lg:px-8">
+      <section className="py-20 px-4 md:px-6 lg:px-8 bg-white dark:bg-gray-950">
         <div className="container mx-auto grid md:grid-cols-2 gap-8 items-center">
           <div className="space-y-6">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
               Transform Your Videos with <span className="text-fuchsia-600 dark:text-fuchsia-400">AI</span> Magic
             </h1>
-            <p className="text-lg md:text-xl">
+            <p className="text-lg md:text-xl text-muted-foreground">
               Elevate your content effortlessly with RollUp AI. Our intuitive platform empowers you to create engaging
               videos quickly and easily.
             </p>
             <div className="flex flex-wrap gap-4">
-              <Button size="lg" className="bg-fuchsia-600 hover:bg-fuchsia-700 text-white">
-                Get Started
+              <Button size="lg" className="bg-fuchsia-600 hover:bg-fuchsia-700 text-white" asChild>
+                <Link to="/register">
+                  Get Started
+                </Link>
               </Button>
-              <Button size="lg" variant="outline" className="text-fuchsia-600 border-fuchsia-600 hover:bg-fuchsia-600/10">
-                Learn More
+              <Button
+                size="lg"
+                variant="outline"
+                className="text-fuchsia-600 border-fuchsia-600 hover:bg-fuchsia-600/10"
+                asChild
+              >
+                <Link to="/pricing">
+                  Learn More
+                </Link>
               </Button>
             </div>
           </div>
@@ -50,11 +52,13 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 px-4 md:px-6 lg:px-8 bg-secondary-foreground">
+      <section className="py-20 px-4 md:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto text-center mb-16">
-          <p className="mb-2 text-sm uppercase tracking-wide text-fuchsia-600">Features</p>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-secondary">Elevate Your Video Content Effortlessly</h2>
-          <p className="text-lg text-muted-foreground dark:text-gray-700 max-w-3xl mx-auto">
+          <p className="mb-2 text-sm uppercase tracking-wide text-fuchsia-600 dark:text-fuchsia-400">Features</p>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
+            Elevate Your Video Content <span className="text-fuchsia-600 dark:text-fuchsia-400">Effortlessly</span>
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
             At RollUp AI, we empower creators by simplifying video production. Our platform offers seamless video
             storage, intuitive editing, and dynamic enhancements to make your content shine.
           </p>
@@ -80,22 +84,31 @@ export default function HomePage() {
 
         <div className="mt-16 text-center">
           <div className="flex flex-wrap justify-center gap-4">
-            <Button variant="default" className="">
-              Learn More
+            <Button
+              size="lg"
+              variant="outline"
+              className="text-fuchsia-600 border-fuchsia-600 hover:bg-fuchsia-600/10"
+              asChild
+            >
+              <Link to="/pricing">Learn More</Link>
             </Button>
-            <Button variant="secondary" className="">
-              Sign Up <ChevronRight className="ml-1 h-4 w-4" />
+            <Button className="bg-fuchsia-600 hover:bg-fuchsia-700 text-white" asChild>
+              <Link to="/register">
+                Sign Up <ChevronRight className="ml-1 h-4 w-4" />
+              </Link>
             </Button>
           </div>
         </div>
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 px-4 md:px-6 lg:px-8 bg-primary-foreground">
+      <section className="py-20 px-4 md:px-6 lg:px-8 bg-white dark:bg-gray-950">
         <div className="container mx-auto">
-          <div className="text-center mb-2 text-sm uppercase tracking-wide text-fuchsia-600">Stats</div>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-center text-primary">
-            Unlock Your Video Editing Potential Today
+          <div className="text-center mb-2 text-sm uppercase tracking-wide text-fuchsia-600 dark:text-fuchsia-400">
+            Stats
+          </div>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-center">
+            Unlock Your <span className="text-fuchsia-600 dark:text-fuchsia-400">Video Editing</span> Potential Today
           </h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-center mb-16">
             With RollUp AI, you can streamline your video editing process and enhance viewer engagement. Our AI-driven
@@ -111,10 +124,15 @@ export default function HomePage() {
 
           <div className="mt-16 text-center">
             <div className="flex flex-wrap justify-center gap-4">
-              <Button variant="outline" className="">
-                Learn More
+              <Button
+                size="lg"
+                variant="outline"
+                className="text-fuchsia-600 border-fuchsia-600 hover:bg-fuchsia-600/10"
+                asChild
+              >
+                <Link to="/pricing">Learn More</Link>
               </Button>
-              <Button className="" asChild>
+              <Button className="bg-fuchsia-600 hover:bg-fuchsia-700 text-white" asChild>
                 <Link to="/register">
                   Sign Up <ChevronRight className="h-4 w-4" />
                 </Link>
@@ -125,11 +143,13 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 px-4 md:px-6 lg:px-8 bg-secondary-foreground">
+      <section className="py-20 px-4 md:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto">
-          <div className="text-center mb-2 text-sm uppercase tracking-wide text-fuchsia-600">Testimonials</div>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-center text-secondary">
-            Don't take our word for it
+          <div className="text-center mb-2 text-sm uppercase tracking-wide text-fuchsia-600 dark:text-fuchsia-400">
+            Testimonials
+          </div>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-center">
+            Don't take <span className="text-fuchsia-600 dark:text-fuchsia-400">our word</span> for it
           </h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto text-center mb-16">
             Hear from our customers who have experienced the benefits of using RollUp AI for their video editing needs.
@@ -171,96 +191,94 @@ export default function HomePage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 px-4 md:px-6 lg:px-8 bg-primary-foreground">
+      <section className="py-20 px-4 md:px-6 lg:px-8 bg-white dark:bg-gray-950">
         <div className="container mx-auto grid justify-items-center">
-          <div className="text-center mb-2 text-sm uppercase tracking-wide text-fuchsia-600">FAQs</div>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-center text-primary">
-            Common Questions
+          <div className="text-center mb-2 text-sm uppercase tracking-wide text-fuchsia-600 dark:text-fuchsia-400">
+            FAQs
+          </div>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 text-center">
+            Common <span className="text-fuchsia-600 dark:text-fuchsia-400">Questions</span>
           </h2>
-          <p className="text-lg mb-16 text-center text-muted-foreground">Find answers to your most common questions about our video editing platform.</p>
+          <p className="text-lg mb-16 text-center text-muted-foreground">
+            Find answers to your most common questions about our video editing platform.
+          </p>
 
           <Accordion type="single" collapsible className="space-y-4 max-w-4xl w-full">
             <AccordionItem value="item-1">
-              <AccordionTrigger>
-                What is RollUp AI?
-              </AccordionTrigger>
+              <AccordionTrigger>What is RollUp AI?</AccordionTrigger>
               <AccordionContent>
-                RollUp AI is an innovative SaaS application that transforms your videos using AI technology. It simplifies video editing by providing intuitive tools for adding overlays and captions. With RollUp AI, you can enhance your content effortlessly.
+                RollUp AI is an innovative SaaS application that transforms your videos using AI technology. It
+                simplifies video editing by providing intuitive tools for adding overlays and captions. With RollUp AI,
+                you can enhance your content effortlessly.
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-2">
-              <AccordionTrigger>
-                How does it work?
-              </AccordionTrigger>
+              <AccordionTrigger>How does it work?</AccordionTrigger>
               <AccordionContent>
-                Simply upload your video to our platform, and our AI will assist in editing. You can add dynamic B-roll, captions, and make real-time adjustments. It's designed to save you time and enhance your content.
+                Simply upload your video to our platform, and our AI will assist in editing. You can add dynamic B-roll,
+                captions, and make real-time adjustments. It's designed to save you time and enhance your content.
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-3">
-              <AccordionTrigger>
-                Is it user-friendly?
-              </AccordionTrigger>
+              <AccordionTrigger>Is it user-friendly?</AccordionTrigger>
               <AccordionContent>
-                Our platform features a simple and intuitive interface that anyone can navigate. You don't need prior editing experience to create engaging videos. We prioritize ease of use for all creators.
+                Our platform features a simple and intuitive interface that anyone can navigate. You don't need prior
+                editing experience to create engaging videos. We prioritize ease of use for all creators.
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-4">
-              <AccordionTrigger>
-                What are the costs?
-              </AccordionTrigger>
+              <AccordionTrigger>What are the costs?</AccordionTrigger>
               <AccordionContent>
-                RollUp AI offers a cost-effective solution compared to traditional video editing software. We provide various pricing plans to fit your needs. Enjoy powerful features without breaking the bank.
+                RollUp AI offers a cost-effective solution compared to traditional video editing software. We provide
+                various pricing plans to fit your needs. Enjoy powerful features without breaking the bank.
               </AccordionContent>
             </AccordionItem>
 
             <AccordionItem value="item-5">
-              <AccordionTrigger>
-                Can I share videos?
-              </AccordionTrigger>
+              <AccordionTrigger>Can I share videos?</AccordionTrigger>
               <AccordionContent>
-                Yes, you can easily share your videos across multiple platforms directly from our app. This feature allows for seamless content distribution. Maximize your reach with just a few clicks.
+                Yes, you can easily share your videos across multiple platforms directly from our app. This feature
+                allows for seamless content distribution. Maximize your reach with just a few clicks.
               </AccordionContent>
             </AccordionItem>
           </Accordion>
 
           <div className="mt-16 text-center">
             <h3 className="text-2xl md:text-3xl font-bold mb-4">Still have questions?</h3>
-            <p className="mb-6">We're here to help you!</p>
-            <Button variant="outline">
-              Contact
+            <p className="mb-6 text-muted-foreground">We're here to help you!</p>
+            <Button
+              variant="outline"
+              className="text-fuchsia-600 border-fuchsia-600 hover:bg-fuchsia-600/10"
+              asChild
+            >
+              <Link to="/pricing">Contact</Link>
             </Button>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="relative bg-secondary-foreground">
-        {/* <img
-          src="/placeholder.svg?height=600&width=1200"
-          alt="Video editing background"
-          width={1200}
-          height={600}
-          className="w-full h-full object-cover absolute inset-0"
-        /> */}
-        <div className="container mx-auto py-20 px-4 md:px-6 lg:px-8 relative z-20">
-          <h3 className="text-xl font-bold mb-4 text-secondary"><span className="text-fuchsia-600">Subscribe</span> & stay updated</h3>
-          <p className="mb-6 text-secondary">Stay informed about our latest features and updates.</p>
-          <div className="flex gap-4 flex-col sm:flex-row">
-            <Input
-              type="email"
-              placeholder="Your Email Here"
-              className="text-secondary border-2 border-border"
-            />
-            <Button variant="secondary">
-              Subscribe
-            </Button>
+      <section className="relative bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto py-20 px-4 md:px-6 lg:px-8 relative z-20 lg:flex lg:flex-col">
+          <div className="w-full flex flex-col items-center justify-center">
+            <h3 className="text-xl font-bold mb-4">
+              <span className="text-fuchsia-600 dark:text-fuchsia-400">Subscribe</span> & stay updated
+            </h3>
+            <p className="mb-6 text-muted-foreground">Stay informed about our latest features and updates.</p>
           </div>
-          <p className="text-sm mt-4 text-secondary/70">By subscribing, you agree to our Privacy Policy.</p>
+
+          <div className="w-full flex flex-col items-center justify-center">
+            <div className="flex gap-4 flex-col sm:flex-row w-8/12">
+              <Input type="email" placeholder="Your Email Here" className="border-2 border-border" />
+              <Button className="bg-fuchsia-600 hover:bg-fuchsia-700 text-white">Subscribe</Button>
+            </div>
+            <p className="text-sm mt-4 text-muted-foreground/70">By subscribing, you agree to our Privacy Policy.</p>
+          </div>
         </div>
       </section>
-    </main >
+    </main>
   )
 }

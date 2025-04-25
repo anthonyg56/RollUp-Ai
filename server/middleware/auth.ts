@@ -46,6 +46,7 @@ export const authorizeRequest = authFactory.createMiddleware(
   async (c, next) => {
     serverLogger.info("Authorizing request");
 
+    const url = new URL(c.req.url);
     const user = c.get("user");
     const session = c.get("session");
 

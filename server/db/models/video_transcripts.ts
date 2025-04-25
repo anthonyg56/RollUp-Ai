@@ -9,7 +9,6 @@ import {
 import { timestamps } from "@server/db/utils";
 import {
   TRANSCRIPTION_FORMATS,
-  TRANSCRIPTION_STATUSES,
   TRANSCRIPTION_SOURCES,
 } from "@server/lib/constants";
 import { relations } from "drizzle-orm";

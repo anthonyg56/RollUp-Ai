@@ -1,43 +1,69 @@
-import { PROCESS_VIDEO_QUEUE } from "@server/queues/config/queue-names";
-import { Worker, Job } from "bullmq";
-import { IProcessVideoData, IProcessVideoResults } from "@server/queues/queues/process-video.queue";
-import { extractVideoMetadata, generateThumbnail, optimizeVideo } from "@server/services/ffmpeg";
-import { getVideoAssetById, uploadAsset } from "@server/services/db/assets.services";
-import redisConnection from "@server/queues/config/redis-connection";
-import { uploadThumnail } from "@server/services/db/video_thumbnail.services";
+import { PROCESS_VIDEO_QUEUE } from "@server/queues/queue-names";
+import { Worker } from "bullmq";
+import { extractAudio, extractVideoMetadata, generateThumbnail, optimizeVideo } from "@server/services/ffmpeg";
+import { getAssetById } from "@server/services/db/assets.services";
+import { writeR2ObjToFile } from "@server/services/r2";
+import { generateTranscripts } from "@server/services/ai";
+import { ProcessNewVideoData } from "@server/queues/types";
 
-const worker = new Worker<IProcessVideoData, IProcessVideoResults>(
+const processVideoWorker = new Worker<ProcessNewVideoData>(
   PROCESS_VIDEO_QUEUE,
-  async function ({ data }) {
-    const { submissionInfo, userId } = data;
+  async ({ data: { submissionData, assetRepository } }) => {
+    const tempFiles: string[] = [];
+    const videoAsset = await getAssetById(submissionData.id);
 
-    const originalVideoAsset = await getVideoAssetById(submissionInfo.videoSubmissionId);
+    try {
+      assetRepository.addAssetId('original_videos', videoAsset.id);
 
-    const optimizedVideoPath = await optimizeVideo(originalVideoAsset.r2Key);
+      const [
+        videoFile,
+        optVideoFile,
+        thumbnailPath,
+        audioFile,
+        srtTranscriptFile,
+        plainTranscriptFile
+      ] = await Promise.all([
+        assetRepository.createAsset('original_videos', `input-${videoAsset.id}.mp4`),
+        assetRepository.createAsset('optimized_videos', `output-${videoAsset.id}.mp4`),
+        assetRepository.createAssetPath('thumbnail'),
+        assetRepository.createAsset('audio', `output-${videoAsset.id}.mp3`),
+        assetRepository.createAsset('srt_transcripts', `output-${videoAsset.id}.srt`),
+        assetRepository.createAsset('plain_transcripts', `output-${videoAsset.id}.txt`),
+      ]);
 
-    const {
-      id: optimizedVideoAssetId,
-      r2Key: optimizedVideoAssetR2Key,
-    } = await uploadAsset({
-      userId,
-      path: optimizedVideoPath,
-      videoSubmissionId: originalVideoAsset.videoSubmissionId,
-      bucketName: "optimized_videos",
-      unlinkPath: false,
-    });
+      tempFiles.push(videoFile, optVideoFile, audioFile);
 
-    const optimizedVideoMetadata = await extractVideoMetadata(optimizedVideoAssetR2Key, optimizedVideoAssetId);
+      await writeR2ObjToFile(videoAsset.r2Key, "original_videos", videoFile);
+      await optimizeVideo(videoFile, optVideoFile);
+      await extractAudio(optVideoFile, audioFile);
 
-    const thumbnailPath = await generateThumbnail(optimizedVideoPath, optimizedVideoMetadata.resolution ?? undefined);
+      const [srtTranscript, plainTranscript] = await Promise.all([
+        generateTranscripts(audioFile, 'srt'),
+        generateTranscripts(audioFile, 'text')
+      ]);
 
-    await uploadThumnail(thumbnailPath, originalVideoAsset.id);
+      await Promise.all([
+        assetRepository.writeContent(srtTranscriptFile, srtTranscript),
+        assetRepository.writeContent(plainTranscriptFile, plainTranscript)
+      ]);
 
-    return {
-      originalVideoAsset,
-      optimizedVideoAssetId,
-      optimizedVideoPath,
-    };
-  }, {
-  connection: redisConnection,
-  autorun: true,
-});
+      const optVideoMetadata = await extractVideoMetadata(optVideoFile);
+      const videoDimensions = `${optVideoMetadata.width}x${optVideoMetadata.height}`;
+      await generateThumbnail(optVideoFile, thumbnailPath, `output-${videoAsset.id}.png`, videoDimensions);
+
+      return
+    } catch (error) {
+      await Promise.allSettled(
+        tempFiles.map(async (filePath) => {
+          const assetKey = assetRepository.getAssetKeyByPath(filePath);
+
+          await assetRepository.removeAsset(assetKey).catch(err =>
+            console.error(`Failed to cleanup temporary file ${filePath}:`, err)
+          )
+        })
+      );
+      throw error;
+    }
+  });
+
+export { processVideoWorker };

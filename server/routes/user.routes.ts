@@ -52,8 +52,7 @@ export default new Hono<{ Variables: HonoVariables }>()
     }
   )
   .get(
-    "/email/:email",
-    authorizeRequest,
+    "/verify/:email",
     zValidator("param", baseEmailParamsSchema),
     async function (c) {
       const { email } = c.req.valid("param");
@@ -83,6 +82,8 @@ export default new Hono<{ Variables: HonoVariables }>()
         data: {
           user,
         },
+      }, {
+        status: 200,
       });
     }
   );

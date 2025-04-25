@@ -79,65 +79,56 @@ export const VIDEO_CATEGORIES = [
 ] as const;
 export type VideoCategory = (typeof VIDEO_CATEGORIES)[number];
 
-export const VIDEO_PROCESSING_STATUSES = [
-  "pending",
-  "processing",
+export const JOB_PROCESSING_STATUS = [
+  "active",
+  "added",
   "completed",
+  "debounced",
+  "delayed",
+  "drained",
   "error",
+  "failed",
+  "paused",
+  "progress",
+  "removed",
+  "stalled",
+  "waiting",
+  "resumed",
+  "retries-exhausted",
+  "stalled",
+  "waiting-children",
 ] as const;
-export type VideoProcessingStatus = (typeof VIDEO_PROCESSING_STATUSES)[number];
+export type JobProcessingStatus = (typeof JOB_PROCESSING_STATUS)[number];
 
-
-export const VIDEO_PROCESSING_STEPS = [
-  "Processing",
-  "Captions",
-  "Broll",
-] as const;
-export type VideoProcessingStep = (typeof VIDEO_PROCESSING_STEPS)[number];
-
-
-export const VIDEO_ASSET_TYPES = [
-  "original_video",
-  "optimized_video",
-  "generated_video",
-  "tech_metadata",
-  "thumbnail",
-  "captioned_video",
-  "srt_transcript",
-  "plain_transcript",
-  "broll",
-  "keyword_extraction",
-] as const;
-export type VideoAssetType = (typeof VIDEO_ASSET_TYPES)[number];
-
-export const R2_BUCKETS = [
+export const ASSET_BUCKETS = [
   "original_videos",
   "optimized_videos",
   "captioned_videos",
-  "generated_videos",
   "srt_transcripts",
   "plain_transcripts",
 ] as const;
-export type R2Bucket = (typeof R2_BUCKETS)[number];
+export type AssetBucket = (typeof ASSET_BUCKETS)[number];
 
-export const VIDEO_PROCESSING_JOBS = [
-  "transcription",
-  "thumbnail_generation",
-  "broll_generation",
+export const ASSET_TYPES = [
+  ...ASSET_BUCKETS,
+  "tech_metadata",
+  "thumbnail",
+  "broll",
+  "audio",
   "keyword_extraction",
-  "video_processing",
 ] as const;
-export type VideoProcessingJob = (typeof VIDEO_PROCESSING_JOBS)[number];
+export type AssetType = (typeof ASSET_TYPES)[number];
+
+export const PROCESS_VIDEO_STEPS = [
+  "Process Video",
+  "Generate Captions",
+  "Generate Broll",
+  "Finalize Video",
+] as const;
+export type ProcessVideoStep = (typeof PROCESS_VIDEO_STEPS)[number];
 
 export const TRANSCRIPTION_SOURCES = ["whisper", "manual", "imported"] as const;
 export type TranscriptionSource = (typeof TRANSCRIPTION_SOURCES)[number];
 
 export const TRANSCRIPTION_FORMATS = ["plain", "srt", "vtt"] as const;
 export type TranscriptionFormat = (typeof TRANSCRIPTION_FORMATS)[number];
-
-export const TRANSCRIPTION_STATUSES = [
-  "processing",
-  "completed",
-  "failed",
-] as const;
-export type TranscriptionStatus = (typeof TRANSCRIPTION_STATUSES)[number];

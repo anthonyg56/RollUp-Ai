@@ -3,11 +3,10 @@ import { z } from "zod";
 import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/typography";
 import OAuthLoginButton from "../OAuthLoginButton";
-import authClient from "@server/auth/authClient";
+import authClient from "@/lib/authClient";
 import AuthCardFooter from "../AuthCardFooter";
 import { useMutation } from "@tanstack/react-query";
-import { Route as LoginRoute } from "@/routes/_auth/_auth.login";
-import { useRouteContext } from "@tanstack/react-router";
+import { useNavigate, useRouteContext } from "@tanstack/react-router";
 
 const { signIn } = authClient;
 
@@ -17,9 +16,6 @@ const loginFormSchema = z.object({
 });
 
 export default function LoginForm() {
-  const navigate = LoginRoute.useNavigate();
-  const { queryClient } = useRouteContext({ from: "/_auth/_auth/login" });
-
   const form = useAppForm({
     defaultValues: {
       email: "",
@@ -31,6 +27,9 @@ export default function LoginForm() {
     onSubmit: async ({ value }) => await mutateAsync({ email: value.email, password: value.password }),
   });
 
+  const navigate = useNavigate({ from: "/login" });
+  const { queryClient } = useRouteContext({ from: "/_auth/_auth/login" });
+
   const { mutateAsync, isPending, isSuccess, isError, failureReason } = useMutation({
     mutationFn: async (data: { email: string, password: string }) => {
       const res = await signIn.email({
@@ -38,35 +37,53 @@ export default function LoginForm() {
         password: data.password,
         fetchOptions: {
           onError: async ({ error }) => {
+            console.log(error);
+
             if (
-              error?.code === "INVALID_EMAIL_OR_PASSWORD" ||
-              error?.code === "PASSWORD_TOO_LONG" ||
-              error?.code === "PASSWORD_TOO_SHORT"
+              error.code === "INVALID_EMAIL_OR_PASSWORD" ||
+              error.code === "PASSWORD_TOO_LONG" ||
+              error.code === "PASSWORD_TOO_SHORT"
             ) {
               throw new Error('Invalid email or password');
             } else if (error?.code === "EMAIL_NOT_VERIFIED") {
-              queryClient.invalidateQueries({ queryKey: ["getSession"] });
               navigate({
                 to: "/verify",
                 search: {
                   type: "email-verification",
                   email: data.email,
+                  isLogin: true,
                 },
               });
             } else {
-              throw new Error(error?.message);
+              throw error;
             }
           },
           credentials: "include",
         },
       });
 
-      return res;
+      return {
+        ...res,
+        email: data.email,
+      };
     },
     onError: (error) => {
       console.log(error);
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
+      if (response.error && response.error?.code === "EMAIL_NOT_VERIFIED") {
+        navigate({
+          to: "/verify",
+          search: {
+            type: "email-verification",
+            email: response.email,
+            isLogin: true,
+          },
+        });
+      } else if (response.error || !response.data) {
+        return;
+      }
+
       queryClient.invalidateQueries({ queryKey: ["getSession"] });
       navigate({
         to: "/videos",

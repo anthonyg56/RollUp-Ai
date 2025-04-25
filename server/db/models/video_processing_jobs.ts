@@ -2,15 +2,13 @@ import { pgEnum, pgTable, uuid, text, index } from "drizzle-orm/pg-core";
 import { timestamps } from "@server/db/utils";
 import { relations } from "drizzle-orm";
 import {
-  VIDEO_PROCESSING_JOBS,
-  VIDEO_PROCESSING_STATUSES,
+  JOB_PROCESSING_STATUS,
+  PROCESS_VIDEO_STEPS,
 } from "@server/lib/constants";
 import { videoSubmissions } from "./videos_submission";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod";
 
-export const jobTypeEnum = pgEnum("job_type", VIDEO_PROCESSING_JOBS);
-
-export const jobStatusEnum = pgEnum("job_status", VIDEO_PROCESSING_STATUSES);
+export const jobStatusEnum = pgEnum("job_status", JOB_PROCESSING_STATUS);
 
 export const videoProcessingJobs = pgTable(
   "video_processing_jobs",
@@ -19,12 +17,10 @@ export const videoProcessingJobs = pgTable(
     videoSubmissionId: uuid("video_submission_id")
       .notNull()
       .references(() => videoSubmissions.id, { onDelete: "cascade" }),
-    jobType: jobTypeEnum("job_type").notNull(),
-    status: jobStatusEnum("status").notNull().default("pending"),
-    runId: text("run_id"),
-    taskId: text("task_id"),
+    jobId: text("job_id").notNull(),
+    status: jobStatusEnum("status").notNull().default("added"),
     errorMessage: text("error_message"),
-    metadata: text("metadata"), // For any job-specific metadata
+    metadata: text("metadata"),
     ...timestamps,
   },
   (table) => {

@@ -3,7 +3,7 @@ import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { otpTypeSchema } from "@/lib/schemas/base";
 import { z } from "zod";
 import VerifyOTPForm from "@/components/forms/VerifyOTPForm";
-import authClient from "@server/auth/authClient";
+import authClient from "@/lib/authClient";
 import { api } from "@/lib/utils";
 import { BASE_HEAD_TITLE } from "@/lib/constants";
 
@@ -12,6 +12,7 @@ const { getSession, emailOtp } = authClient;
 export const Route = createFileRoute('/_auth/_auth/verify')({
   validateSearch: zodValidator(
     z.object({
+      isLogin: fallback(z.boolean(), false).default(false),
       email: fallback(z.string(), "").default(""),
       type: fallback(otpTypeSchema, "email-verification")
         .default("email-verification"),
@@ -20,7 +21,10 @@ export const Route = createFileRoute('/_auth/_auth/verify')({
   beforeLoad: async ({ search }) => {
     const { data } = await getSession();
 
-    if (!data && search.email === "") {
+    const isInvalid = !data && search.email === "";
+    const isVerifiedUser = data && data.user.emailVerified === true && search.type === "email-verification";
+
+    if (isInvalid)
       throw redirect({
         to: "/login",
         search: {
@@ -28,46 +32,47 @@ export const Route = createFileRoute('/_auth/_auth/verify')({
           toastReason: "Account Not Found",
         },
       });
-    } else if (data && data.user.emailVerified) {
+
+    if (isVerifiedUser)
       throw redirect({ to: "/videos" });
-    } else if (search.type === "email-verification") {
 
-      try {
-        const response = await api.users.email[":email"].$get({
-          param: {
-            email: search.email,
-          },
-        });
-
-        if (response.status === 200) {
-          const { data: responseData } = await response.json();
-          const { user } = responseData;
-
-          if (user.emailVerified) {
-            throw redirect({ to: "/videos" });
-          }
-
-          await emailOtp.sendVerificationOtp({
-            email: search.email,
-            type: search.type,
+    if (search.type === "email-verification") {
+      const response = await api.users.verify[":email"].$get({
+        param: {
+          email: search.email,
+        },
+      })
+        .catch(err => {
+          console.log(err);
+          throw redirect({
+            to: "/login",
+            search: {
+              showToast: true,
+              toastReason: "Account Not Found",
+            },
           });
-        }
-
-        throw redirect({
-          to: "/login",
-          search: {
-            showToast: true,
-            toastReason: "Account Not Found",
-          },
         });
-      } catch (error) {
-        console.error(error);
-        throw redirect({
-          to: "/login",
-          search: { showToast: true, toastReason: "Account Not Found" },
+
+      const { data: responseData } = await response.json();
+      const { user } = responseData;
+
+      if (user.emailVerified === true) {
+        throw redirect({ to: "/videos" });
+      };
+
+      const isLogin = search.isLogin;
+
+      if (isLogin) {
+        await emailOtp.sendVerificationOtp({
+          email: search.email,
+          type: search.type,
         });
       }
+
+      return
     }
+
+    return
   },
   head: () => ({
     meta: [

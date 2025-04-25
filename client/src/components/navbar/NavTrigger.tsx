@@ -2,7 +2,7 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 import DesktopTrigger from "./DesktopTrigger";
 import type { HonoUser } from "@server/types";
 import { MobileDrawer } from "./MobileDrawer";
-import authClient from "@server/auth/authClient";
+import authClient from "@/lib/authClient";
 import { useNavigate, useRouteContext } from "@tanstack/react-router";
 import { matchRoutesType } from "@/lib/utils";
 
@@ -24,8 +24,8 @@ export default function NavTrigger({ isLoading, user, pathname }: INavTriggerPro
       signOut({
         fetchOptions: {
           onSuccess: () => {
-            navigate({ to: "/login", search: { showToast: true, toastReason: "Logout" } });
             queryClient.invalidateQueries({ queryKey: ["getSession"] });
+            navigate({ to: "/login", search: { showToast: true, toastReason: "Logout" } });
           }
         }
       })
@@ -44,7 +44,9 @@ export default function NavTrigger({ isLoading, user, pathname }: INavTriggerPro
 
   if (matchRoutesType(pathname, "Auth") && !isMobile)
     return null;
-  if (isMobile)
+  else if (pathname === "/verify")
+    return null;
+  else if (isMobile)
     return (
       <MobileDrawer
         user={user}
