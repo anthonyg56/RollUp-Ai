@@ -3,12 +3,13 @@ import { timestamps } from "@server/db/utils";
 import { relations } from "drizzle-orm";
 import {
   JOB_PROCESSING_STATUS,
-  PROCESS_VIDEO_STEPS,
 } from "@server/lib/constants";
 import { videoSubmissions } from "./videos_submission";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod";
+import { PROCESS_VIDEO_STEPS } from "@server/queues/process-new-video/queue-names";
 
 export const jobStatusEnum = pgEnum("job_status", JOB_PROCESSING_STATUS);
+export const processingStepsEnum = pgEnum("processing_steps", PROCESS_VIDEO_STEPS);
 
 export const videoProcessingJobs = pgTable(
   "video_processing_jobs",
@@ -18,8 +19,10 @@ export const videoProcessingJobs = pgTable(
       .notNull()
       .references(() => videoSubmissions.id, { onDelete: "cascade" }),
     jobId: text("job_id").notNull(),
+    step: processingStepsEnum("step"),
     status: jobStatusEnum("status").notNull().default("added"),
     errorMessage: text("error_message"),
+    failedReason: text("failed_reason"),
     metadata: text("metadata"),
     ...timestamps,
   },

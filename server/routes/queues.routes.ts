@@ -3,9 +3,8 @@ import { HonoUser, HonoVariables } from "@server/types";
 import { authorizeRequest } from "@server/middleware/auth";
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
-import createVideoProcessingFlow from "@server/queues/flows/process-new-video.flow";
+import createVideoProcessingFlow from "@server/queues/process-new-video/flow";
 import { HTTPException } from "hono/http-exception";
-import { PROCESS_VIDEO_QUEUE } from "@server/queues/queue-names";
 import { VideoProgressAsset } from "@server/services/db/assets.services";
 import { insertJob } from "@server/services/db/video_processing_jobs.service";
 import db from "@server/db";
@@ -15,7 +14,7 @@ import { getTableColumns } from "drizzle-orm";
 import { users } from "@server/db/models";
 import { videoAssets } from "@server/db/models/video_assets";
 import { serverLogger } from "@server/lib/configs/logger";
-import { qeStreamSSE } from "@server/queues/listeners/utils";
+import { qeStreamSSE } from "@server/queues/process-new-video/listener";
 
 const initalizeVideoProcessingJsonSchema = z.object({
   id: z.string(),
@@ -135,6 +134,5 @@ export default new Hono<{ Variables: HonoVariables }>()
       return qeStreamSSE(c, {
         jobId: asset.jobId,
         flowJobId,
-        queueName: PROCESS_VIDEO_QUEUE,
       });
     });

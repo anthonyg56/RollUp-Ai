@@ -1,6 +1,13 @@
 import { serverLogger } from '@server/lib/configs/logger';
 import ffmpeg from 'fluent-ffmpeg';
 import { unlink } from 'node:fs/promises';
+import ffmpegPath from '@ffmpeg-installer/ffmpeg';
+import ffprobePath from '@ffprobe-installer/ffprobe';
+import { BrollInputFile } from './pexels';
+import { basename } from 'node:path';
+
+ffmpeg.setFfmpegPath(ffmpegPath.path);
+ffmpeg.setFfprobePath(ffprobePath.path);
 
 const optimizeVideoDefaultOptions = {
   maxWidth: 1920,
@@ -122,6 +129,40 @@ export async function extractVideoMetadata(inputPath: string) {
 }
 
 /**
+ * Burns the captions into the video asset.
+ * 
+ * @param videoInputPath - The path to the video asset
+ * @param srtTranscript - The SRT transcript to burn into the video asset
+ * @param videoAssetId - The ID of the video asset
+ * 
+ * @returns The path to the captioned video asset
+ */
+export async function burnCaptions(videoInputPath: string, outputPath: string, srtPath: string) {
+  return new Promise<string>((resolve, reject) => {
+    ffmpeg(videoInputPath)
+      .videoCodec('libx264')
+      .addOptions([
+        '-preset veryslow',
+        '-crf 23',
+        '-movflags +faststart',
+        '-profile:v main',
+        '-level 4.0',
+        '-pix_fmt yuv420p',
+        `-vf subtitles=${srtPath}:force_style='Fontname=Arial,FontSize=24,PrimaryColour=&Hffffff,OutlineColour=&H000000,BorderStyle=3,Outline=1'`
+      ])
+      .audioCodec('copy')
+      .output(outputPath)
+      .on('end', async () => {
+        resolve(outputPath);
+      })
+      .on('error', async (err) => {
+        reject(err);
+      })
+      .run();
+  });
+}
+
+/**
  * Generates a thumbnail from the video asset.
  * 
  * @param inputPath - The path to the video asset
@@ -177,67 +218,45 @@ export async function extractAudio(inputPath: string, outputPath: string) {
   });
 };
 
-/**
- * Burns the captions into the video asset.
- * 
- * @param videoInputPath - The path to the video asset
- * @param srtTranscript - The SRT transcript to burn into the video asset
- * @param videoAssetId - The ID of the video asset
- * 
- * @returns The path to the captioned video asset
- */
-export async function burnCaptions(videoInputPath: string, outputPath: string, srtPath: string) {
-  return new Promise<boolean>((resolve, reject) => {
-    ffmpeg(videoInputPath)
-      .videoCodec('libx264')
-      .addOptions([
-        '-preset veryslow',
-        '-crf 23',
-        '-movflags +faststart',
-        '-profile:v main',
-        '-level 4.0',
-        '-pix_fmt yuv420p',
-        `-vf subtitles=${srtPath}:force_style='Fontname=Arial,FontSize=24,PrimaryColour=&Hffffff,OutlineColour=&H000000,BorderStyle=3,Outline=1'`
-      ])
-      .audioCodec('copy')
-      .output(outputPath)
-      .on('end', async () => {
-        resolve(true);
-      })
-      .on('error', async (err) => {
-        reject(true);
-      })
-      .run();
-  });
-}
+export async function mergeBrollClips(
+  source: string,
+  brollClips: BrollInputFile[],
+  output: string,
+  srtPath?: string // Optional srtPath parameter
+): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    const sourceName = basename(source);
 
-export async function addBroll(
-  startSeconds: number,
-  endSeconds: number,
-  paths: {
-    inputPath: string,
-    outputPath: string,
-    brollPath: string
-  },
-) {
-  await new Promise<void>((resolve, reject) => {
-    ffmpeg()
-      .input(paths.inputPath)
-      .input(paths.brollPath)
-      .complexFilter([
-        `[1:v]scale=640:360[overlay]`,
-        `[0:v][overlay]overlay=main_w-overlay_w-10:main_h-overlay_h-10:enable='between(t,${startSeconds},${endSeconds})'[outv]`
-      ])
-      .map('[outv]')
-      .outputOptions('-c:a copy')
-      .save(paths.outputPath)
+    let command = ffmpeg(source);
+
+    brollClips.forEach(clip => {
+      command = command
+        .input(clip.source)
+        .complexFilter([
+          `[1:v]scale=640:360[overlay]`,
+          `[0:v][overlay]overlay=main_w-overlay_w-10:main_h-overlay_h-10:enable='between(t,${clip.timestamps.start},${clip.timestamps.end})'[outv]`
+        ])
+        .map('[outv]')
+        .outputOptions('-c:a copy');
+    });
+
+    // Add burn captions if srtPath is provided
+    if (srtPath) {
+      command = command.outputOptions([
+        `-vf subtitles=${srtPath}:force_style='Fontname=Arial,FontSize=24,PrimaryColour=&Hffffff,OutlineColour=&H000000,BorderStyle=3,Outline=1'`,
+      ]);
+    }
+
+    command
+      .output(output)
       .on('end', () => {
-        serverLogger.info(`Successfully added B-roll`);
+        serverLogger.info(`Successfully merged B-roll clips`);
         resolve();
       })
       .on('error', (err) => {
-        serverLogger.error(`Error adding B-roll: ${err.message}`);
+        serverLogger.error(`Error merging B-roll clips: ${err.message}`);
         reject(new Error(`FFmpeg processing failed: ${err.message}`));
-      });
+      })
+      .run();
   });
 }

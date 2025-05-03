@@ -70,7 +70,7 @@ export default new Hono<{ Variables: HonoVariables }>()
         r2ETag,
         userId: user.id,
         videoSubmissionId,
-        assetType: "original_videos",
+        assetType: "original_video",
       });
 
       return c.json({
@@ -124,4 +124,5 @@ export default new Hono<{ Variables: HonoVariables }>()
         },
       });
     }
-  ) 
+  )
+

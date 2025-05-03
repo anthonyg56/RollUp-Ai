@@ -5,7 +5,7 @@ import { useNavigate } from "@tanstack/react-router"
 import { CheckCircle2 } from "lucide-react"
 
 import { Loader2 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { Route as ProcessVideoRoute } from "@/routes/_protected/_protected.videos.$id.process";
 import { api } from "@/lib/utils"
 import { useMutation } from "@tanstack/react-query"
@@ -101,19 +101,90 @@ export default function ProcessVideoPage() {
 
       return jobId.id;
     },
-    onSuccess: async () => {
-      setMessage("Video processing starting for " + videoSubmission.title + "...");
+    onSuccess: async (receivedFlowJobId) => {
+      if (receivedFlowJobId) {
+        setMessage("Video processing starting for " + videoSubmission.title + "...");
 
-      const progressUrl = api.queues["process-video"][":assetId"].progress.$url({
-        param: {
-          assetId: videoSubmission.assetId,
-        },
-      });
+        const progressUrl = api.queues["process-video"][":assetId"].progress.$url({
+          param: {
+            assetId: videoSubmission.assetId,
+          },
+        });
 
-      setEventSourceUrl(progressUrl.pathname);
-      return;
+        console.log("Setting EventSource URL:", progressUrl.pathname);
+
+        setEventSourceUrl(progressUrl.pathname);
+      } else {
+        setMessage("Failed to obtain Job ID to track progress.");
+      }
+    },
+    onError: (err) => {
+      setError(err);
     }
   });
+
+  // Function to update step state immutably
+  const updateStepState = useCallback((jobName: string, updates: Partial<ProcessingStep> & { progress?: Partial<ProcessingProgress> }) => {
+    setSteps(prevSteps => {
+      const stepIndex = prevSteps.findIndex(s => s.jobName === jobName);
+      if (stepIndex === -1) {
+        console.warn(`UI Step not found for jobName: ${jobName}`);
+        return prevSteps; // Return previous state if step not found
+      }
+
+      const newSteps = [...prevSteps];
+      const currentStep = newSteps[stepIndex];
+
+      // Merge updates
+      newSteps[stepIndex] = {
+        ...currentStep,
+        ...updates,
+        // Deep merge progress
+        progress: {
+          ...currentStep.progress,
+          ...updates.progress,
+        },
+      };
+
+      // If a step starts processing, ensure subsequent steps are pending
+      if (updates.status === 'processing') {
+        setMessage(`Processing: ${currentStep.name}...`);
+        for (let i = stepIndex + 1; i < newSteps.length; i++) {
+          if (newSteps[i].status !== 'pending') {
+            newSteps[i].status = 'pending';
+            newSteps[i].progress = { percentage: 0 };
+            newSteps[i].errorMessage = undefined;
+          }
+        }
+      }
+      // If a step completes, mark the next one as processing (or pending if needed)
+      else if (updates.status === 'completed') {
+        newSteps[stepIndex].progress.percentage = 100; // Ensure 100% on complete
+        setMessage(`${currentStep.name} completed.`);
+        if (stepIndex + 1 < newSteps.length) {
+          // Don't force next to processing, wait for its 'active' event
+          // newSteps[stepIndex + 1].status = 'processing';
+        } else {
+          // This was the last step
+          setAllCompleted(true);
+          setMessage("All processing steps completed successfully!");
+        }
+      }
+      // If a step fails, mark subsequent steps as pending (or error?)
+      else if (updates.status === 'error') {
+        setMessage(`Error during: ${currentStep.name}.`);
+        for (let i = stepIndex + 1; i < newSteps.length; i++) {
+          if (newSteps[i].status !== 'pending') {
+            newSteps[i].status = 'pending'; // Or maybe 'error'/'cancelled'?
+            newSteps[i].progress = { percentage: 0 };
+          }
+        }
+        setAllCompleted(false); // Ensure continue button is disabled on error
+      }
+
+      return newSteps;
+    });
+  }, []);
 
   // handle progress ui
   useEffect(() => {

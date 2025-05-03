@@ -105,12 +105,17 @@ export const ASSET_BUCKETS = [
   "optimized_videos",
   "captioned_videos",
   "srt_transcripts",
-  "plain_transcripts",
+  "plain_transcript",
 ] as const;
 export type AssetBucket = (typeof ASSET_BUCKETS)[number];
 
 export const ASSET_TYPES = [
-  ...ASSET_BUCKETS,
+  "original_video",
+  "optimized_video",
+  "captioned_video",
+  "srt_transcript",
+  "plain_transcript",
+  "generated_video",
   "tech_metadata",
   "thumbnail",
   "broll",
@@ -120,9 +125,9 @@ export const ASSET_TYPES = [
 export type AssetType = (typeof ASSET_TYPES)[number];
 
 export const PROCESS_VIDEO_STEPS = [
-  "Process Video",
-  "Generate Captions",
+  "Setup Assets",
   "Generate Broll",
+  "Generate Captions",
   "Finalize Video",
 ] as const;
 export type ProcessVideoStep = (typeof PROCESS_VIDEO_STEPS)[number];

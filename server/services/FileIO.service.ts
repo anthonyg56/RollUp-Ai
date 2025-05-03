@@ -1,10 +1,13 @@
 import { Logger } from "winston";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
-import { tmpdir } from "node:os";
-import { filesystemLogger } from "@server/lib/configs/logger";
-import { createReadStream, createWriteStream } from "node:fs";
+import { filesystemLogger, serverLogger } from "@server/lib/configs/logger";
+import { createReadStream, createWriteStream, existsSync } from "node:fs";
 import type { ReadStream, WriteStream } from "node:fs";
+import { basename } from "node:path";
+import { join } from "node:path";
+import { resolve } from "node:path";
+import { tmpdir } from "node:os";
 
 export class FileServiceError extends Error {
   public readonly error?: Error;
@@ -291,6 +294,28 @@ export async function createStreamFromPath(inputPath: string, streamType: 'read'
   }
 }
 
+export async function createDir(path: string) {
+  const isBasename = basename(path).includes('.');
+
+  if (isBasename) {
+    throw new Error('Path cannot contain a basename');
+  }
+
+  const dirPath = join(tmpdir(), path);
+  const resolvedDirPath = resolve(dirPath);
+
+  try {
+    await fs.mkdir(resolvedDirPath, { recursive: true });
+
+    if (!existsSync(resolvedDirPath)) {
+      throw new Error('Failed to create directory');
+    }
+
+    return resolvedDirPath;
+  } catch (error) {
+    serverLogger.error(`Error creating directory: ${error}`);
+  }
+}
 const RootFileService = new FileService();
 
 export default RootFileService;

@@ -1,7 +1,7 @@
 import { uuidSchema } from "@/lib/schemas/base";
 import { BASE_HEAD_TITLE } from "@/lib/constants";
 import { api } from "@/lib/utils";
-import ProcessVideoPage from "@/pages/protected/videos/process-video";
+import ProcessVideoPage from "@/pages/protected/videos/process-video/geminiIndex";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute('/_protected/_protected/videos/$id/process')({

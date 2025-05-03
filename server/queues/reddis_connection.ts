@@ -5,7 +5,7 @@ const redisPassword = process.env.REDIS_PASSWORD;
 const redisHost = process.env.REDIS_HOST;
 const redisPort = parseInt(process.env.REDIS_PORT || '6379', 10);
 
-export default function createRedisConn(type: 'Queue Events' | 'Flow Job', jobId?: string) {
+export default function createRedisConn(type: 'Queue Events' | 'Flow Job' | 'Queue' | 'Worker', jobId?: string) {
   serverLogger.info(`Initalizing a new ${type} Redis Connection`, {
     host: redisHost,
     port: redisPort,
@@ -38,3 +38,5 @@ export default function createRedisConn(type: 'Queue Events' | 'Flow Job', jobId
 
   return connection;
 };
+
+export const defaultRedisConnection = createRedisConn('Queue Events');

@@ -1,6 +1,6 @@
 import { serverLogger } from "@server/lib/configs/logger";
-import { JobProgress, Queue, QueueEvents } from "bullmq";
-import { SSEStreamingApi, stream } from "hono/streaming";
+import { JobProgress, QueueEvents } from "bullmq";
+import { SSEStreamingApi } from "hono/streaming";
 
 export interface QEListenerArgs {
   jobId: string;
@@ -8,7 +8,7 @@ export interface QEListenerArgs {
   returnvalue: string;
   failedReason: string;
   prev?: string;
-}
+};
 
 export interface QEListeners {
   activeListener: (args: Pick<QEListenerArgs, 'jobId' | 'prev'>, id: string) => void;
@@ -28,7 +28,7 @@ export interface QEListenerOptions {
 
   data?: any;
   customListeners?: QEListenersRecord;
-}
+};
 
 export class QEListener {
   private readonly listeners: Array<() => void> = [];

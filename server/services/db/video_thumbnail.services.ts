@@ -2,7 +2,7 @@ import db from "@server/db";
 import { videoThumbnails, NewVideoThumbnails } from "@server/db/models";
 import { uploadToCloudflareImages } from "@server/services/images";
 
-export async function uploadThumnail(path: string, assetId: string) {
+export async function uploadThumbnail(path: string, assetId: string) {
   const file = Bun.file(path);
   const cloudflareResults = await uploadToCloudflareImages(file);
 
