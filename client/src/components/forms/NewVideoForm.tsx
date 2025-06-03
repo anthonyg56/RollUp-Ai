@@ -1,5 +1,5 @@
-import { useAppForm } from "@/hooks/useFormApp";
-import { useDialogStore } from "@/hooks/useStores";
+import { useAppForm } from "@/components/hooks/useFormApp";
+import { useDialogStore } from "@/components/hooks/useStores";
 import { api } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";

@@ -1,4 +1,4 @@
-import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useMediaQuery } from "@/components/hooks/useMediaQuery";
 import DesktopTrigger from "./DesktopTrigger";
 import type { HonoUser } from "@server/types";
 import { MobileDrawer } from "./MobileDrawer";

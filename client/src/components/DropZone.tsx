@@ -7,7 +7,7 @@ import { Upload, Video, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { ZodError } from "zod"
-import { useDialogStore } from "@/hooks/useStores";
+import { useDialogStore } from "@/components/hooks/useStores";
 import { fileListSchema } from "@/lib/schemas/base";
 import { cn } from "@/lib/utils"
 

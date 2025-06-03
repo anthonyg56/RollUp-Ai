@@ -4,9 +4,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 import { MessageCircle, Moon, Sun, User } from "lucide-react";
 import UserAvatar from "@/components/UserAvatar";
 import { ArrowLeftToLine, ChevronsUpDown, ExternalLink } from "lucide-react";
-import { useTheme } from "@/hooks/useTheme";
+import { useTheme } from "@/components/hooks/useTheme";
 import { capitalizeFirstLetter, matchRoutesType } from "@/lib/utils";
-import { useDialogStore } from "@/hooks/useStores";
+import { useDialogStore } from "@/components/hooks/useStores";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRouterState } from "@tanstack/react-router";
 import { useNavigate } from "@tanstack/react-router";

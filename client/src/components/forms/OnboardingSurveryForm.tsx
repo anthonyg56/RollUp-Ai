@@ -1,4 +1,4 @@
-import { useAppForm } from "@/hooks/useFormApp";
+import { useAppForm } from "@/components/hooks/useFormApp";
 import { surveyIndustriesAnswers, SurveyIndustry, SurveyReferralSource, surveyReferralSourcesAnswers } from "@/lib/constants";
 import { z } from "zod";
 import { surveyIndustrySchema } from "@/lib/schemas/base";

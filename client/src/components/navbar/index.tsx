@@ -8,7 +8,7 @@ import NavTrigger from "./NavTrigger";
 import { matchRoutesType } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { ModeToggle } from "@/components/ToggleTheme";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useMediaQuery } from "@/components/hooks/useMediaQuery";
 import UploadVideoButton from "@/components/navbar/UploadVideoButton";
 
 export default function Navbar() {

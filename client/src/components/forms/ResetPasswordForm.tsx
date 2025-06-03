@@ -1,4 +1,4 @@
-import { useAppForm } from "@/hooks/useFormApp";
+import { useAppForm } from "@/components/hooks/useFormApp";
 import { PASSWORD_REQUIREMENTS } from "@/lib/constants";
 import { z } from "zod";
 import { Route as ResetPasswordRoute } from "@/routes/_auth/_auth.reset";

@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useTheme } from "@/hooks/useTheme"
+import { useTheme } from "@/components/hooks/useTheme"
 import type { HonoSession } from "@server/types";
 
 interface IToggleThemeProps {

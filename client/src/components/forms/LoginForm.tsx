@@ -1,4 +1,4 @@
-import { useAppForm } from "@/hooks/useFormApp";
+import { useAppForm } from "@/components/hooks/useFormApp";
 import { z } from "zod";
 import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/typography";

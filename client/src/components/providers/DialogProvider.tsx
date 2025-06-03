@@ -2,7 +2,7 @@
 import { ComponentPropsWithoutRef, useRef } from "react";
 import { createDashboardDialogStore, DashboardDialogState } from "@/lib/stores/dialog-store";
 import { DialogStoreContext } from "@/lib/contexts";
-import { useDialogStore } from "@/hooks/useStores";
+import { useDialogStore } from "@/components/hooks/useStores";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import UploadNewVideoDialog from "@/components/dialogs/UploadNewVideoDialog";
 

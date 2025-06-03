@@ -2,7 +2,7 @@
 
 import { DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import NewVideoForm from "@/components/forms/NewVideoForm"
-import { useDialogStore } from "@/hooks/useStores";
+import { useDialogStore } from "@/components/hooks/useStores";
 import { useState } from "react";
 import DropZone from "../DropZone";
 

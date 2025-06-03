@@ -1,4 +1,4 @@
-import { useAppForm } from "@/hooks/useFormApp";
+import { useAppForm } from "@/components/hooks/useFormApp";
 import { emailSchema } from "@/lib/schemas/base";
 
 import { z } from "zod";

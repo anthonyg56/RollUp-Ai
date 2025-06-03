@@ -1,4 +1,4 @@
-import { useAppForm } from "@/hooks/useFormApp";
+import { useAppForm } from "@/components/hooks/useFormApp";
 
 import { z } from "zod";
 import { InputOTPSeparator } from "../ui/input-otp";

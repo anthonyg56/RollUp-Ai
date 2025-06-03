@@ -1,4 +1,4 @@
-import { useDialogStore } from "@/hooks/useStores"
+import { useDialogStore } from "@/components/hooks/useStores"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 
